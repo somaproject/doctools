@@ -4,93 +4,11 @@
 Turns xml into svg. Yea, i could do this with xslt, but it sounds like more work than it's worth.
 """
 
+import sys
 
 from elementtree import ElementTree
 from elementtree.ElementTree import Element, SubElement, dump
 
-from xml.sax import make_parser
-from xml.sax.handler import ContentHandler
-
-
-class TimingHandler(ContentHandler):
-    """
-    A handler to deal with our signal object thingies
-
-    """
-
-    def __init__(self):
-        self.svgfilename = ""
-        self.timingobj = None
-        self.inData = False
-        self.inClass = False
-        self.inTiming = False
-        
-    def startElement(self, name, attrs):
-
-        if name == "timingobject":
-            self.svgfilename = "%s.timing.svg" % (attrs['name'],)
-            
-            self.timingobject = timing(self.svgfilename)
-            self.inData = False
-            self.inClass = False
-            self.inTiming = True
-            
-        elif name == "timing":
-            self.svgfilename = ""
-            self.timingobject = timing(self.svgfilename)
-            self.inData = False
-            self.inClass = False
-            self.inTiming = True
-            
-        elif name == "clock" or name == "bus" or name == "signal":
-            if self.inTiming:
-                self.datastr = ""
-                self.classstr = ""
-                self.name = attrs['name']
-
-                if name == "clock" or name=="signal":
-                    self.inData = True
-        elif name == "data":
-            if self.inTiming:
-                self.inData = True
-
-        elif name == "class":
-            if self.inTiming:
-                self.inClass = True
-            
-            
-    def characters(self, characters):
-        
-        if self.inData :
-            self.datastr += characters
-        elif self.inClass:
-            self.classstr += characters
-
-    def endElement(self, name):
-        if self.inData :
-            self.inData = False
-
-        if self.inClass:
-            self.inClass = False
-        
-        if self.inTiming :
-            if name == "clock":
-                self.timingobject.add_clock(self.name, self.datastr)
-            elif name == "signal":
-                self.timingobject.add_signal(self.name, self.datastr)
-            elif name == "bus":
-                
-                self.timingobject.add_bus(self.name, self.datastr, self.classstr)
-
-            if name == "timing" or name=="timingobject":
-                self.inTiming = False
-                self.timingobject.timinggrid()
-                self.timingobject.set_size()
-                self.timingobject.save()
-                
-            
-
-    
 
 class signal:
     """
@@ -451,7 +369,46 @@ class timing:
         
 import sys
 
+def parseTiming(filename):
+    fid = file(filename)
+
+    ls = fid.readlines()
+
+
+
     
+    timingobject = timing(filename + ".svg")
+    
+
+    while len(ls) > 0:
+        l = ls.pop(0)
+        seg = l.split(':')
+        if len(seg) > 3:
+            seg = [seg[0], seg[1]+ ':' + seg[2], seg[3]]
+
+        cl = seg[0].strip()
+        na = seg[1].strip()
+        de = seg[2].strip()
+
+        if cl == 'C':
+            timingobject.add_clock(na, de)
+        elif cl == 'S':
+            timingobject.add_signal(na, de)
+        elif cl == 'B':
+            
+            l = ls.pop(0)
+            seg = l.split(':')
+            bde = seg[2].strip()
+            
+            timingobject.add_bus(na, de, bde)
+    timingobject.timinggrid()
+    timingobject.set_size()
+    timingobject.save()
+                
+
+        
+        
+        
 def main():
     """
     called with filename.xml filename.svg will convert xml
@@ -464,13 +421,17 @@ def main():
 
 
     """
-    th = TimingHandler()
 
-    saxparser = make_parser()
+    #th = TimingHandler()
 
-    saxparser.setContentHandler(th)
-    saxparser.parse(sys.stdin)
+    #saxparser = make_parser()
 
+    #saxparser.setContentHandler(th)
+    #saxparser.parse(sys.stdin)
+
+
+    parseTiming(sys.argv[1])
+    
 
 if __name__ == "__main__":
     main()

@@ -406,11 +406,15 @@ class timing:
         
         for i in range(len(data)):
             cyccolor = color
-            if self.classes.has_key(classes[i]):
-                cyccolor = self.classes[classes[i]]
+            if len(classes) == 0:
+                cl = 0
+            else:
+                cl = classes[i]
+            if self.classes.has_key(cl):
+                cyccolor = self.classes[cl]
             else:
                 cyccolor = self.colors.pop(0)
-                self.classes[classes[i]] = cyccolor
+                self.classes[cl] = cyccolor
             if data[i] =='//':
                 sigelem.append(sig.draw_split())
             elif data[i] == 'Z':

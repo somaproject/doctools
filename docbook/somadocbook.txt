@@ -41,6 +41,9 @@ Thus the initial need for the makefile... thus we create docmake.py
 
 Now, the thing that sucks is there's no good way of converting svg to eps at all. 
 
+Batik sucks so much that, tonight, I'm going to try and add command-line support, fix bugs in inkscape. 
+
+
 
 -----------------------------------------------------------------------
 Timing

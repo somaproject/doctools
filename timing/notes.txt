@@ -1,0 +1,7 @@
+Timing diagram generator. Currently only supports one clock per diagram, and the borders/etc. are difficult to deal with. 
+
+Currently depends on elementtree to parse xml, generate svg. 
+
+Note "classes", which allow bus colorings. 
+
+imagemagick will convert svg to eps

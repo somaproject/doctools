@@ -1,0 +1,43 @@
+<timing>
+   <clock name="CLK" cycles="11"/>
+   <signal name="DATAEN">
+      <h>1</h>
+      <l>6</l>
+      <split/>
+      <l>1</l>
+      <h>2</h>
+   </signal> 
+   <signal name="DATAACK">
+      <h>2</h>
+      <l>5</l>
+      <split/>
+      <h>3</h>
+   </signal>
+   <bus name="SYSDATA" class="1">
+      <z>2</z>
+      <d>D0</d>
+      <d>D1</d>
+      <d>D2</d>
+      <d>D3</d>
+      <d>D4</d>
+      <d>D5</d>
+      <split/>
+      <d>Dn-3</d>
+      <d>Dn-2</d>
+      <d>Dn-1</d>   
+   </bus>
+   <bus name="FOOBAR" class="1">
+      <z class="2">2</z>
+      <d class="2">D0</d>
+      <d class="2">D1</d>
+      <d class="2">D2</d>
+      <d class="3">D3</d>
+      <d class="3">D4</d>
+      <d class="3">D5</d>
+      <split/>
+      <d>Dn-3</d>
+      <d>Dn-2</d>
+      <d>Dn-1</d>   
+   </bus>
+</timing>
+ 

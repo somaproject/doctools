@@ -203,7 +203,7 @@ class signal:
         
         telem = Element("text")
         telem.attrib['x'] =  "%f" %  (self.x + self.period/2)
-        telem.attrib['y'] = "%f" % (self.y - self.height/4.0)
+        telem.attrib['y'] = "%f" % (self.y - self.height/4.0-0.3)
         telem.attrib['font-family'] = "Helvetica"
         telem.attrib['font-size'] = "%f" % (self.height/1.9)
         telem.attrib['text-anchor'] = "middle"
@@ -231,7 +231,7 @@ class timing:
 
         self.xzero = 90
         self.signalcnt  =  len(self.root)
-        self.cycles = self.root.find("clock").attrib['cycles']
+        self.cycles = len(self.root.find("clock").text.split())
 
 
         self.colors = ['powderblue', 'palegreen', 'lightpink', 'lightsalmon', 'lightgrey']
@@ -243,14 +243,14 @@ class timing:
         # first, create grid
         self.svgelem.append(self.timinggrid())
 
-        pos = self.height
+        pos = self.height + self.signalspacing
         for i in self.root:
             self.svgelem.append(self.add_signal(i, pos))
             pos += self.signalspacing + self.height
 
             
         self.svgelem.attrib["width"] = str(self.xzero + int(self.cycles)*self.period + 2)
-        self.svgelem.attrib['height'] = str(self.signalcnt * (self.height+ self.signalspacing) +2)
+        self.svgelem.attrib['height'] = str(self.signalcnt * (self.height+ self.signalspacing) + self.signalspacing +2)
 
         print self.classes
         
@@ -266,24 +266,21 @@ class timing:
         if selem.tag == 'clock':
             clksig = signal(selem.attrib['name'], self.xzero, y, self.period, self.height)
             sigelem.append(clksig.draw_name())
-            for i in range(int(selem.attrib['cycles'])):
+            for i in selem.text.split():
                 sigelem.append(clksig.draw_clock())
         elif selem.tag == 'signal':
             sig = signal(selem.attrib['name'], self.xzero, y, self.period, self.height)
             sigelem.append(sig.draw_name())
 
             
-            for i in selem:
-                if i.tag == 'h':
-                    for j in range(int(i.text)):
-                        sigelem.append(sig.draw_high())
-                elif i.tag == 'l':
-                    for j in range(int(i.text)):
-                        sigelem.append(sig.draw_low())
-                elif i.tag == 'z':
-                    for j in range(int(i.text)):
-                        sigelem.append(sig.draw_z())
-                elif i.tag == 'split':
+            for i in selem.text.split():
+                if i == 'H':
+                    sigelem.append(sig.draw_high())
+                elif i == 'L':
+                    sigelem.append(sig.draw_low())
+                elif i == 'Z':
+                    sigelem.append(sig.draw_z())
+                elif i == '//':
                     sigelem.append(sig.draw_split())
                        
         elif selem.tag == 'bus':
@@ -291,33 +288,28 @@ class timing:
             sigelem.append(sig.draw_name())
 
             color = "white"
-            
-            if selem.attrib.has_key('class'):
-                if self.classes.has_key(selem.attrib['class']):
-                    color = self.classes[selem.attrib['class']]
-                
-                else:
-                    color = self.colors.pop(0)
-                    self.classes[selem.attrib['class']] = color
 
-            for cycle in selem:
+            datastr = selem.find('data')
+           
+            data = datastr.text.split()
+
+            classstr = selem.find('class')
+            if classstr != None:
+               classes = classstr.text.split()
+
+            for i in range(len(data)):
                 cyccolor = color
-                if cycle.attrib.has_key('class'):
-                    
-                    if self.classes.has_key(cycle.attrib['class']):
-                        cyccolor = self.classes[cycle.attrib['class']]
-                
-                    else:
-                        cyccolor = self.colors.pop(0)
-                        self.classes[cycle.attrib['class']] = cyccolor
-                if cycle.tag =='d':
-                    sigelem.append(sig.draw_bus(cycle.text, cyccolor))
-                elif cycle.tag == 'z':
-                    sigelem.append(sig.draw_z())
-                elif cycle.tag == 'split':
+                if self.classes.has_key(classes[i]):
+                    cyccolor = self.classes[classes[i]]
+                else:
+                    cyccolor = self.colors.pop(0)
+                    self.classes[classes[i]] = cyccolor
+                if data[i] =='//':
                     sigelem.append(sig.draw_split())
-                    
-                
+                elif data[i] == 'Z':
+                    sigelem.append(sig.draw_z())
+                else:
+                    sigelem.append(sig.draw_bus(data[i], cyccolor))            
 
         return sigelem
                 
@@ -337,7 +329,7 @@ class timing:
             lelem.attrib['x1'] = str(i*self.period + self.period/2.0 + self.xzero)
             lelem.attrib['y1'] = str(0);
             lelem.attrib['x2'] = str(i*self.period + self.period/2.0 + self.xzero)
-            lelem.attrib['y2'] = str(self.signalcnt*(self.height + self.signalspacing))
+            lelem.attrib['y2'] = str(self.signalcnt*(self.height + self.signalspacing) + self.signalspacing)
             lelem.attrib['stroke'] = "grey"
             lelem.attrib['stroke-width'] = "0.5"
             gelem.append(lelem)

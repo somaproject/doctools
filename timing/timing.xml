@@ -1,43 +1,16 @@
 <timing>
-   <clock name="CLK" cycles="11"/>
-   <signal name="DATAEN">
-      <h>1</h>
-      <l>6</l>
-      <split/>
-      <l>1</l>
-      <h>2</h>
-   </signal> 
-   <signal name="DATAACK">
-      <h>2</h>
-      <l>5</l>
-      <split/>
-      <h>3</h>
-   </signal>
-   <bus name="SYSDATA" class="1">
-      <z>2</z>
-      <d>D0</d>
-      <d>D1</d>
-      <d>D2</d>
-      <d>D3</d>
-      <d>D4</d>
-      <d>D5</d>
-      <split/>
-      <d>Dn-3</d>
-      <d>Dn-2</d>
-      <d>Dn-1</d>   
+   <clock name="CLK"    >  |  |  |  |  |  |  |  |  |  |  | </clock>
+   <signal name="DATAEN">  H  H  H  H  L  //  H  Z  H  L  H </signal>
+   <signal name="DATAACK"> H  H  L  Z  Z  //  L  Z  H  L  Z </signal>
+   <bus name="SYSDATA">
+     <data>               D0  D1 D2 D3 D4 D5 // Dn-3 Dn-2 Dn-1 Z Z </data>
+     <class>              1   1   1  1  1  1  1  1     1   1   1 1 </class>
    </bus>
-   <bus name="FOOBAR" class="1">
-      <z class="2">2</z>
-      <d class="2">D0</d>
-      <d class="2">D1</d>
-      <d class="2">D2</d>
-      <d class="3">D3</d>
-      <d class="3">D4</d>
-      <d class="3">D5</d>
-      <split/>
-      <d>Dn-3</d>
-      <d>Dn-2</d>
-      <d>Dn-1</d>   
+   <bus name="FOOBAR">
+     <data>               D0  D1 D2 D3 D4 D5 // Dn-3 Dn-2 Dn-1 Z Z </data>
+     <class>              2   2   2  2  3  3  1  4     4   4   1 1 </class>
    </bus>
+
+
 </timing>
  

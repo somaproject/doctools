@@ -1,14 +1,14 @@
 <timing>
-   <clock name="CLK"    >  |  |  |  |  |  |  |  |  |  |  | </clock>
-   <signal name="DATAEN">  H  H  H  H  L  //  H  Z  H  L  H </signal>
-   <signal name="DATAACK"> H  H  L  Z  Z  //  L  Z  H  L  Z </signal>
+   <clock name="CLK"    >  |  |  |  |  |  |  |  |  |  | </clock>
+   <signal name="DATAEN">  H  H  H  H  L  H  Z  H  L  H </signal>
+   <signal name="DATAACK"> H  H  L  Z  Z  L  Z  H  L  Z </signal>
    <bus name="SYSDATA">
-     <data>               D0  D1 D2 D3 D4 D5 // Dn-3 Dn-2 Dn-1 Z Z </data>
-     <class>              1   1   1  1  1  1  1  1     1   1   1 1 </class>
+     <data>               D0  D1 D2 D3 D4 D5 Dn-3 Dn-2 Dn-1 Z Z </data>
+     <class>              1   1   1  1  1  1   1     1   1   1 1 </class>
    </bus>
    <bus name="FOOBAR">
-     <data>               D0  D1 D2 D3 D4 D5 // Dn-3 Dn-2 Dn-1 Z Z </data>
-     <class>              2   2   2  2  3  3  1  4     4   4   1 1 </class>
+     <data>               D0  D1 D2 D3 D4 D5 Dn-3 Dn-2 Dn-1 Z Z </data>
+     <class>              2   2   2  2  3  3    4     4   4   1 1 </class>
    </bus>
 
 

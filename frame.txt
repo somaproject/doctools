@@ -1,31 +1,53 @@
 How to describe packets. The important thing to realize is that each frame is just a subframe of the other type. I.e. 
 
-
-<frame>
-    <name>Event</name>
-
+Target applications: 
+  * Soma Network Protocol
+  * Soma Acqboard Fiber I/O 
+  * DSP/FPGA interface
+  * Event bus per-byte layout
+  * Unix Domain Socket Protocol
 
 
 What I'd like to be able to do is say:
 Things to note: 
-    for a frame definition, len = number of words this frame is in length
+    for a frame definition:
     id = unique field-valid ID for that field
     name = name to be printed
     info = info about the filed
     valset = set of options for the field, and explanations
-    words = "n:m" high byte is at n, low byte is at m
-    bits = subfield bits in use. 
+    wordlen = nominal number of bits in a word; shows the expected width of the data stream. For most things, this is 8 bits (1 byte) but we have numerous double-byte-wide protocols. 
 
+    bits = subfield bits in use:
+        remainder = remainder of bits in the field
+    num: means that the subfield contained within can have multiple copies of itself. 
+    endian = "l" == little bit first
+    
+    Frames can contain fields, which can contain frames,     
+
+How do I represent a length of n short little-endian ints? 
+    <field bits="16" id="valArray" num="n">
+       <name> Value Array </name>
+       <info> My array of short ints </info>
+    </field>
+
+How do I represent a length of m copies of a subframe:
+    <field id="myTypeArray" num="m">
+      <name>channel data array </name>
+      <info> 1 to 4 of the following channel types>
+      <frame> 
+         ...
+      </frame>
+    </field>
 
 
 
 <frame len="25" wordlen="8">
     <name>Acqboard TX</name>
-    <field words="0:0" id="k">
+    <field bits="8" id="k">
          <name>K.28.5</name>
          <info>8b/10b comma character which specifies frame start </info>
     </field>
-    <field words="1:1" id="cmdst">
+    <field bits="8" id="cmdst">
          <name>CMDST</name>
          <info>Current command status of the acquisition board<info>
 	    <valset value="0x00"> Mode 0 (normal) running</valset>
@@ -34,62 +56,10 @@ Things to note:
 	    <valset value="0x03"> Mode 1 (offset disable) loading</valset>
 	 </info>    
     </field>
-    <field words="3:2" id="data-a1">
+    <field bits="16" id="data-a1" endian=">
 	   <name>DATA A1</data>
 	   <info>16-bit twos-complement sample from channel A1</info>
     </field>
+    ... 
 </frame>
 
-<frame len="5" wordlen="8">
-    <name>Acqboard RX</name>
-    <field words="0:0" bits="7:4" id="cmdid">
-	<name>CMDID</name>
-	<info>The CMDID is a 4-bit nonce sent with each command. When the CMDID appears in the received packets, the command has been processed</info>
-    <field words="0:0" bits="3:0" id="cmd">
-	<name>CMD</name>
-	<info>Command for board to process</info>
-    </field>
-    <field words="1:1" id="data0">
-        <name>DATA0</name>
-    </field>
-    <field words="2:2" id="data1">
-        <name>DATA1</name>
-    </field>
-    <field words="3:3" id="data2">
-        <name>DATA2</name>
-    </field>
-    <field words="4:4" id="data3">
-        <name>DATA3</name>
-    </field>
-</frame>
-
-
-
-for implementations of a packet, many of the above apply, except that:
-type = a frame type as defined above, in which the id specifies an xml field
-name is this particular packets name
-<foo>value</foo> is a fixed value for this frame
-if something spans more than two fields (which we will assume to be adjacent)
-it will have the same "name" for those two fields, except that one of them will have "type=msb" set to indicate, well, this is the msb. 
-
-
-<frame type="Acqboard RX">
-    <name>Write Offset</name>
-    <cmd>0x04</cmd>
-    <data0>
-	<name>Chan</name>
-	<info>Channel number, 0-9</info>	
-    </data0>
-    <data1>
-	<name>Gain</name>
-	<info>Gain setting on the PGA, from 0 to 7</info>
-    </data1>  
-    <data2 type="msb">	
-	   <name>Value</name>
-    </data2>
-    <data3><name>Value</name>
-	   <info>16-bit twos-complement offset</info>
-    </data3>
-</frame>
-
-	

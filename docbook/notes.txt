@@ -1,0 +1,38 @@
+Docbook:
+http://www.lodestar2.com/people/dyork/talks/2002/ols/docbook-tutorial/frames/frames.html
+
+ xsltproc -o test.html /usr/share/xml/docbook/stylesheet/nwalsh/xhtml/docbook.xsl test.docbook
+
+Docbook XSL info
+
+http://www.sagehill.net/docbookxsl/
+
+Writing documentation using docbook -- from cern
+
+http://xml.web.cern.ch/XML/goossens/dbatcern/
+
+
+http://www.xmlhack.com/read.php?item=2061
+nxml-mode
+
+
+gentle guide to docbook:
+
+http://www-106.ibm.com/developerworks/library/l-docbk.html
+
+Docbook extensions I want to add or create :
+
+<signaldef set="EventBus"> a list of signal definitions, or something. This will also be usable for the VHDL fu.
+    <signal active="low" type="clock"> 
+           <name>FOO</name>
+	   <info>bar baz foo</>
+    </signal>
+</signaldef>
+
+outside of a signal def, we can just reference it with <signal set="EventBus">FOO</signal>
+
+We can use the xslt identity transform along with some custom code to essentially
+
+
+for FOP:
+fop -xml test.xml -xsl  /usr/share/xml/docbook/stylesheet/nwalsh/fo/docbook.xsl -pdf test2.pdf

@@ -85,6 +85,7 @@ class TimingHandler(ContentHandler):
             if name == "timing" or name=="timingobject":
                 self.inTiming = False
                 self.timingobject.timinggrid()
+                self.timingobject.set_size()
                 self.timingobject.save()
                 
             

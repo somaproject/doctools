@@ -9,6 +9,10 @@ def trimstr(str):
      
      return q.sub("", p.sub("", str))
 
+def newlinetospace(str):
+     p = re.compile(r"\n", re.MULTILINE)
+     return p.sub(" ", str); 
+
 class DocbookElement:
     
     def __init__(self, attrs):
@@ -75,6 +79,9 @@ class Article(Components):
             self.title = obj.chars
         elif isinstance(obj, Author):
             self.author = obj.chars
+        elif isinstance(obj, ArticleInfo):
+             self.author = obj.author
+             self.title = obj.title
         else:
             self.chars += obj.to_latex()
 
@@ -127,12 +134,35 @@ class Bibliography(Sections):
      
      
 # METAS #####################################################################
+class ArticleInfo(Metas):
+
+    def append(self, obj):
+         
+        if isinstance(obj, str) or isinstance(obj, unicode):
+            self.chars += str(obj)
+        elif isinstance(obj, Title):
+            self.title = obj.chars
+        elif isinstance(obj, Author):
+            self.author = obj.to_latex()
+        else:
+            self.chars += obj.to_latex()
+
+    def to_latex(self):
+        return self.chars
+
 
 class Author(Metas):
-    pass
+     def to_latex(self):
+          return newlinetospace(trimstr(self.chars))
 
 class Title(Metas):
     pass
+
+class Firstname(Metas):
+     pass
+
+class Surname(Metas):
+     pass
         
 # BLOCKS ####################################################################
 class Para(Blocks):
@@ -150,7 +180,7 @@ class Figure(Blocks):
         self.caption = ""
         self.fileref = ""
         self.fileformat = ""
-        
+        self.tite = ""
         
         Blocks.__init__(self, attrs)
 
@@ -160,16 +190,31 @@ class Figure(Blocks):
             self.fileref = obj.dataobj.fileref
             self.fileformat = obj.dataobj.fileformat
             self.width = obj.dataobj.width
+        elif isinstance(obj, Title):
+             self.title = obj.chars
+             
 
     def to_latex(self):
         # here we go : )
-        str = "\n\\begin{figure}\n"
+        str = "\n\\begin{figure}[!h]\n"
         str += "\\centering\n"
-        str += "\\includegraphics[width=" + self.width + "]{" + self.fileref + "}\n"
-        str += "\\caption{" + self.caption + "}\n"
+        str += "\\includegraphics"
+        if self.width != "":
+             str += "[width=" + self.width + "]"
+        str += "{" + self.fileref + "}\n"
+        
+        if self.title != "" and self.caption == "":
+             
+             str += "\\caption{" + self.title + "}\n"
+        elif self.title == "" and self.caption != "":
+             str += "\\caption{" + self.caption + "}\n"
+        elif self.title != "" and self.caption != "":
+             str += "\\caption{\textbf{" + self.caption + ":} " + self.title + "}\n"
+
         str += "\\end{figure}"
 
         return str
+
 class Caption(Blocks):
     def append(self, obj):
         if isinstance(obj, str) or isinstance(obj, unicode):
@@ -191,14 +236,14 @@ class ImageObject(Inlines):
     def __init__(self, attrs):
         self.fileref = ""
         self.fileformat = ""
-        self.width = "100%"
+        self.width = ""
         Inlines.__init__(self, attrs)
 
     def append(self, obj):
         if isinstance(obj, ImageData):
             self.fileref = obj.attrs["fileref"]
             self.fileformat = obj.attrs["format"]
-            self.width = obj.attrs.get("contentwidth", "100%")
+            self.width = obj.attrs.get("contentwidth", "")
             
 
 
@@ -222,6 +267,25 @@ class Xref(Inlines):
         return "\cite{" + self.attrs["linkend"] + "}"
     
 
+# CUSTOM ------------------------------------------------------------------
+
+class Signal(Inlines):
+     
+     def to_latex(self):
+          print self.chars
+          # for signals, we regexp out the relevant bits
+          rebits = re.compile(r"\s*(\w+)(\[([0-9:]+)\])*\s*")
+          bm = rebits.match(self.chars)
+          bits = bm.groups()
+          signal = "\\textrm{%s}" % bits[0]  # get signal name
+          if self.attrs.get("active") == "low":
+               signal = "\\bar{" + signal +  "}"
+
+          if bits[2]:
+               signal += "_\\textrm{" + bits[2] + "}"
+               
+          return "$%s$" % signal
+     
         
 def main():
     x = Inline("")

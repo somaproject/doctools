@@ -61,13 +61,16 @@ So, what is our toolchain flow?
 
 From our original documnet:
 
-1. extract out timing diagrams, turn them into svg files, turn those into .eps, .png
+1. extract out timing diagrams, turn them into svg files, turn those into .eps, .png, create appropriate files. 
+
+
 2. Turn timing media object into associated image media objects
 
 3. run through hardware.xsl:
     Handles <signal>
 	    <memmap>, 
-    turning them into native docbook
+    turning them into native docbook, or maybe special formatting dance
+
 
 4. Math: how to handle it:
    1. print output: resulting docbook + math stuff will be turned into tex by our to-tex conversion code
@@ -79,6 +82,18 @@ From our original documnet:
 How to handle interfacing with vhdl & design documents? 
     How to crop out unnecessary stuff? Viewports? 
     Obviously we need one document per figure. 
+
+----------------------------------------------------------------------------
+June 22, 2004: A new day of docbook
+----------------------------------------------------------------------------
+
+Wow, so rather than extendin' and modifyin' stuff all to hell, tonight I'm going to sit down and examine some of the docbook basics that I've been ignoring. 
+
+First, a customization layer. I no longer think this is such crazy hoo-ha. To start with, take the "signal" tag that I've created. Ideally, it'll be turned into something nice-looking in HTML. 
+
+so we have html.hardware.xsl which does the mydocbook -> html translation bit. 
+
+Now, handling xrefs works okay within documents for html. Let's try including files:
 
 
 

@@ -28,6 +28,11 @@ class dispatcher:
     elements["caption"] = DocbookElement.Caption
     elements["xref"] = DocbookElement.Xref
     elements["bibliography"] = DocbookElement.Bibliography
+    elements["signal"] = DocbookElement.Signal
+    elements["articleinfo"] = DocbookElement.ArticleInfo
+    elements["firstname"] = DocbookElement.Firstname
+    elements["surname"] = DocbookElement.Surname
+
     def __call__(self, element, attrs):
         print "processing", element
         if self.elements.has_key(element):

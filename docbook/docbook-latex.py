@@ -28,6 +28,10 @@ What if we do things really recursively...
 
     What if you create new objects, and push them on a stack, and then call them with associated objects? I mean, what if, for exmple, para creates a para object, and we add chars to a para object, and then should we encounter emphasis, we create an emphasis object, and when we're done, we pass the emphasis object to the para object, which knows to serialize it into 
 
+
+Ohh, how to do figures? we'll first parse for everything with an "ID"
+
+
     
 """
 
@@ -36,6 +40,7 @@ from xml.sax.handler import ContentHandler
 
 import Dispatcher
 import DocbookElement
+from  DBxrefHandler import *
 
 
 class DBLaTeXHandler(ContentHandler):
@@ -64,6 +69,8 @@ class DBLaTeXHandler(ContentHandler):
 
 
 
+
+
 import sys
 from LatexDoc import * 
 
@@ -73,9 +80,19 @@ def main():
     filename = sys.argv[1]
     f = file(filename, 'r')
 
+    # first, we build up an xref list:
+    dbxh = DBxrefHandler()
+    saxparser = make_parser()
+    
+    saxparser.setContentHandler(dbxh)
+    saxparser.parse(f)
+    
+    
+    return 
+
     output = LatexDoc(sys.argv[2])
     
-    dbh = DBLaTeXHandler(output)
+    dbh = DBLaTeXHandler(output, xrefIDs)
     saxparser = make_parser()
 
     saxparser.setContentHandler(dbh)

@@ -21,6 +21,7 @@ class LatexDoc:
             articleheader = r"""\documentclass{article}
             \usepackage{fullpage}
             \usepackage{graphicx}
+            %%\usepackage[pdftex,bookmarks=true]{hyperref}
             """
             self.outfile.write(articleheader)
             self.outfile.write("\\title{%s}\n"% element.title)
@@ -32,4 +33,3 @@ class LatexDoc:
 
 
         self.outfile.close()
-

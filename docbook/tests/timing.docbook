@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<article>
+  <articleinfo>
+    <title> The Use of Naquida-based Superconductors for Stable Wormhole
+    Creation </title>
+    <author><firstname> Samamtha</firstname>
+    <surname> Carter </surname></author>
+  </articleinfo>
+  <section>
+    <title> Introduction</title>
+    <para> La la la, shouldn't we get some sort of
+    timing-diagram-thing going on here? </para>
+
+
+    <figure id="EventBus">
+      <title> EventBus Timing</title>
+      <mediaobject>
+	<timingobject name="eventbustiming">
+	  <clock name="CLK"    >  |  |  |  |  |  |  |  |  |  |  | </clock>
+	  <signal name="DATAEN">  H  H  H  H  L  //  H  Z  H  L  H </signal>
+	  <signal name="DATAACK"> H  H  L  Z  Z  //  L  Z  H  L  Z </signal>
+	  <bus name="SYSDATA">
+	    <data>               D0  D1 D2 D3 D4 D5 // Dn-3 Dn-2 Dn-1 Z Z 
+	    </data>
+	    <class>              1   1   1  1  1  1  1  1     1   1   1 1 
+	    </class>
+	  </bus>
+	  <bus name="FOOBAR">
+	    <data>               D0  D1 D2 D3 D4 D5 // Dn-3 Dn-2 Dn-1 Z Z 
+	    </data>
+	    <class>              2   2   2  2  3  3  1  4     4   4   1 1 
+	    </class>
+	  </bus>
+	</timingobject>
+	
+	<caption>
+	  <para>Timing on the event bus -- everybody climb aboard! 
+	  </para>
+	</caption>
+      </mediaobject>
+    </figure>
+
+
+    <para> And here would be another one! </para>
+    <figure id="AnotherFigure">
+      <title> Some simple timing</title>
+      <mediaobject>
+	<timingobject name="simpletimeing">
+	  <clock name="CLK">  |  |  |  |  |  |  |  |  |  |  | </clock>
+	  <signal name="FOO"> H  L  H  L  H  H  L  H  L   L H  </signal>
+	</timingobject>
+	
+	<caption>
+	  <para>This is lame, simple timing 
+	  </para>
+	</caption>
+      </mediaobject>
+    </figure>
+
+
+  </section>
+</article>

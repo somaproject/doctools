@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<article>
+  <articleinfo>
+    <title> The Use of Naquida-based Superconductors for Stable Wormhole
+    Creation </title>
+    <author><firstname> Samamtha</firstname>
+    <surname> Carter </surname></author>
+  </articleinfo>
+  <section>
+    <title> Introduction</title>
+    <para> La la la, shouldn't we get some sort of
+    timing-diagram-thing going on here? </para>
+    <figure>
+      <title> A simple image example and test </title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="image.FSM.svg"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title> A simple image example and test </title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="doggie.png"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title> A simple image example and test </title>
+      <mediaobject>
+	<imageobject>
+	  <imagedata fileref="graph.eps"/>
+	</imageobject>
+      </mediaobject>
+    </figure>
+
+  </section>
+</article>

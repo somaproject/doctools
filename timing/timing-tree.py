@@ -111,7 +111,11 @@ class timing:
 
     def add_clock_to_tree(self, name, datastr):
 	self.cycles = len(datastr.split())
+	clksig = signal(name, self.xzero, self.ypos, self.period, self.height)
 	tree.append(self.cycles)
+	tree.append((clksig.draw_name(), clksig.draw_clock()))
+	
+	self.ypos += self.signalspacing + self.height  
 
 
 
@@ -132,16 +136,24 @@ class signal:
     def draw_name(self):
         """ the name is to the left of the original draw point"""
         dict = {}
-        dict[x] = (self.startx -4)
-        dict[y] = (self.starty-4)
-        dict[font-family] = "Helvetica"
-        dict[font-size] = (self.height/1.4)
-        dict[text-anchor] = "end"
-        dict[name] = self.name
+        dict['x'] = (self.startx -4)
+        dict['y'] = (self.starty-4)
+        dict['font-family'] = "Helvetica"
+        dict['font-size'] = (self.height/1.4)
+        dict['text-anchor'] = "end"
+        dict['name'] = self.name
         return dict
-       
-
-
+      
+    def draw_clock(self):
+	dict = {}
+        ptuple = (self.x, self.y, self.period/2, -self.height, self.period/2, self.height)
+        dict['d'] = "M%f,%f h%f v%f h%f v%f" % ptuple
+        dict['stroke'] = "black"
+        dict['fill'] = "none"
+        dict['stroke-linecap'] = "square"
+        self.x += self.period
+        self.sval = 'L'
+	return dict
 
 
 

@@ -46,3 +46,39 @@ Additions to docbook that we've made:
    <addr a="0x0000"> Bar </addr>
    <addr a="lala-lama"> </addr>
 </memmap>
+
+
+For math:
+   <math>foobar</math> for inline math
+   <eqn> 
+	 for equation-like objects
+   </eqn>
+
+
+
+
+So, what is our toolchain flow?
+
+From our original documnet:
+
+1. extract out timing diagrams, turn them into svg files, turn those into .eps, .png
+2. Turn timing media object into associated image media objects
+
+3. run through hardware.xsl:
+    Handles <signal>
+	    <memmap>, 
+    turning them into native docbook
+
+4. Math: how to handle it:
+   1. print output: resulting docbook + math stuff will be turned into tex by our to-tex conversion code
+   2. HTML output: create images, use them inline, etc. 
+
+
+
+
+How to handle interfacing with vhdl & design documents? 
+    How to crop out unnecessary stuff? Viewports? 
+    Obviously we need one document per figure. 
+
+
+

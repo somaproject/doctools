@@ -49,7 +49,7 @@
   
   
   <xsl:template match="memmap">
-    <table>
+    <informaltable frame="none">
       <title><xsl:value-of select="@title"/></title>
       <tgroup cols='2' align='left' colsep='1' rowsep='1'>
 	<thead>
@@ -62,7 +62,7 @@
 	  <xsl:apply-templates select="@* | node()"/>
 	</tbody>
       </tgroup>
-    </table>
+    </informaltable>
   </xsl:template>
   
   <xsl:template match="memmap/addr">
@@ -72,13 +72,16 @@
 	  <xsl:value-of select="@a"/>    
 	</filename>
       </entry>
-      <entry>     
+      <entry><para>     
 	<xsl:apply-templates select="@* | node()"/>
-      </entry>
+      </para></entry>
     </row>
   </xsl:template>
-  
-  
-  
+
+  <xsl:template match="math">
+    <![CDATA[$
+	<xsl:apply-templates select="@* | node()"/>
+     $]]>
+  </xsl:template>
   
 </xsl:stylesheet>

@@ -8,6 +8,89 @@ Turns xml into svg. Yea, i could do this with xslt, but it sounds like more work
 from elementtree import ElementTree
 from elementtree.ElementTree import Element, SubElement, dump
 
+from xml.sax import make_parser
+from xml.sax.handler import ContentHandler
+
+
+class TimingHandler(ContentHandler):
+    """
+    A handler to deal with our signal object thingies
+
+    """
+
+    def __init__(self):
+        self.svgfilename = ""
+        self.timingobj = None
+        self.inData = False
+        self.inClass = False
+        self.inTiming = False
+        
+    def startElement(self, name, attrs):
+
+        if name == "timingobject":
+            self.svgfilename = "%s.timing.svg" % (attrs['name'],)
+            
+            self.timingobject = timing(self.svgfilename)
+            self.inData = False
+            self.inClass = False
+            self.inTiming = True
+            
+        elif name == "timing":
+            self.svgfilename = ""
+            self.timingobject = timing(self.svgfilename)
+            self.inData = False
+            self.inClass = False
+            self.inTiming = True
+            
+        elif name == "clock" or name == "bus" or name == "signal":
+            if self.inTiming:
+                self.datastr = ""
+                self.classstr = ""
+                self.name = attrs['name']
+
+                if name == "clock" or name=="signal":
+                    self.inData = True
+        elif name == "data":
+            if self.inTiming:
+                self.inData = True
+
+        elif name == "class":
+            if self.inTiming:
+                self.inClass = True
+            
+            
+    def characters(self, characters):
+        
+        if self.inData :
+            self.datastr += characters
+        elif self.inClass:
+            self.classstr += characters
+
+    def endElement(self, name):
+        if self.inData :
+            self.inData = False
+
+        if self.inClass:
+            self.inClass = False
+        
+        if self.inTiming :
+            if name == "clock":
+                self.timingobject.add_clock(self.name, self.datastr)
+            elif name == "signal":
+                self.timingobject.add_signal(self.name, self.datastr)
+            elif name == "bus":
+                
+                self.timingobject.add_bus(self.name, self.datastr, self.classstr)
+
+            if name == "timing" or name=="timingobject":
+                self.inTiming = False
+                self.timingobject.timinggrid()
+                self.timingobject.save()
+                
+            
+
+    
+
 class signal:
     """
 
@@ -23,7 +106,7 @@ class signal:
        draw_z
        draw_bus
        draw_hash
-
+p
     each of these incrmeents an internal 'tick' variable that we use to figure
     out where to draw. 
     """
@@ -215,14 +298,14 @@ class signal:
         return gelem
 
 
-class timing:
 
+
+class timing:
+    
     def __init__(self, filename):
         
         self.filename = filename
         
-        self.root = ElementTree.parse(filename).getroot()
-
         # we assume that the clock is the maximum length
         
         self.period = 40
@@ -230,92 +313,115 @@ class timing:
         self.signalspacing = 10
 
         self.xzero = 90
-        self.signalcnt  =  len(self.root)
-        self.cycles = len(self.root.find("clock").text.split())
-
-
+        self.signalcnt  = 0 
+        self.cycles = 0
+        
+        
         self.colors = ['powderblue', 'palegreen', 'lightpink', 'lightsalmon', 'lightgrey']
         self.classes = {}
-
+        
         
         self.svgelem = Element("svg")
 
-        # first, create grid
-        self.svgelem.append(self.timinggrid())
+        self.signalselem = Element("g")
+        
+        self.ypos = self.height + self.signalspacing
+      
+       
 
-        pos = self.height + self.signalspacing
-        for i in self.root:
-            self.svgelem.append(self.add_signal(i, pos))
-            pos += self.signalspacing + self.height
 
-            
+
+    def set_size(self):
         self.svgelem.attrib["width"] = str(self.xzero + int(self.cycles)*self.period + 2)
         self.svgelem.attrib['height'] = str(self.signalcnt * (self.height+ self.signalspacing) + self.signalspacing +2)
 
-        print self.classes
         
-    def save(self, filename):
-        
-        ElementTree.ElementTree(self.svgelem).write(filename)
-        
+    def save(self):
 
-    def add_signal(self, selem, y):
-        """ expects a signal element"""
+        if self.filename == "":
+            dump(self.svgelem)
+        else:
+            print "Creating ", self.filename
+            ElementTree.ElementTree(self.svgelem).write(self.filename)
+
+    
+    def add_clock(self, name, datastr):
+        
+        sigelem = Element('g')
+
+        # this is where we get the cycle count
+        
+        self.cycles = len(datastr.split())
+        
+        clksig = signal(name, self.xzero, self.ypos, self.period, self.height)
+        sigelem.append(clksig.draw_name())
+        for i in datastr.split():
+                sigelem.append(clksig.draw_clock())
+
+        self.ypos += self.signalspacing + self.height   
+
+        self.signalselem.append(sigelem)
+        self.signalcnt += 1
+        
+                
+    
+    def add_signal(self, name, datastr):
 
         sigelem = Element('g')
-        if selem.tag == 'clock':
-            clksig = signal(selem.attrib['name'], self.xzero, y, self.period, self.height)
-            sigelem.append(clksig.draw_name())
-            for i in selem.text.split():
-                sigelem.append(clksig.draw_clock())
-        elif selem.tag == 'signal':
-            sig = signal(selem.attrib['name'], self.xzero, y, self.period, self.height)
-            sigelem.append(sig.draw_name())
-
-            
-            for i in selem.text.split():
-                if i == 'H':
-                    sigelem.append(sig.draw_high())
-                elif i == 'L':
-                    sigelem.append(sig.draw_low())
-                elif i == 'Z':
-                    sigelem.append(sig.draw_z())
-                elif i == '//':
-                    sigelem.append(sig.draw_split())
-                       
-        elif selem.tag == 'bus':
-            sig = signal(selem.attrib['name'], self.xzero, y, self.period, self.height)
-            sigelem.append(sig.draw_name())
-
-            color = "white"
-
-            datastr = selem.find('data')
-           
-            data = datastr.text.split()
-
-            classstr = selem.find('class')
-            if classstr != None:
-               classes = classstr.text.split()
-
-            for i in range(len(data)):
-                cyccolor = color
-                if self.classes.has_key(classes[i]):
-                    cyccolor = self.classes[classes[i]]
-                else:
-                    cyccolor = self.colors.pop(0)
-                    self.classes[classes[i]] = cyccolor
-                if data[i] =='//':
-                    sigelem.append(sig.draw_split())
-                elif data[i] == 'Z':
-                    sigelem.append(sig.draw_z())
-                else:
-                    sigelem.append(sig.draw_bus(data[i], cyccolor))            
-
-        return sigelem
-                
-            
+        sig = signal(name, self.xzero, self.ypos, self.period, self.height)
+        
+        sigelem.append(sig.draw_name())
             
         
+        for i in datastr.split():
+            if i == 'H':
+                sigelem.append(sig.draw_high())
+            elif i == 'L':
+                sigelem.append(sig.draw_low())
+            elif i == 'Z':
+                sigelem.append(sig.draw_z())
+            elif i == '//':
+                sigelem.append(sig.draw_split())
+
+        self.ypos += self.signalspacing + self.height   
+        self.signalselem.append(sigelem)
+        self.signalcnt += 1
+
+        
+    def add_bus(self, name, datastr, classstr):
+        sigelem = Element('g')
+
+        
+        sig = signal(name, self.xzero, self.ypos, self.period, self.height)
+        sigelem.append(sig.draw_name())
+
+        color = "white"
+
+        data = datastr.split()
+
+        if classstr != None:
+            classes = classstr.split()
+
+        
+        for i in range(len(data)):
+            cyccolor = color
+            if self.classes.has_key(classes[i]):
+                cyccolor = self.classes[classes[i]]
+            else:
+                cyccolor = self.colors.pop(0)
+                self.classes[classes[i]] = cyccolor
+            if data[i] =='//':
+                sigelem.append(sig.draw_split())
+            elif data[i] == 'Z':
+                sigelem.append(sig.draw_z())
+            else:
+                sigelem.append(sig.draw_bus(data[i], cyccolor))            
+
+        self.ypos += self.signalspacing + self.height   
+        self.signalselem.append(sigelem)
+        self.signalcnt += 1
+                
+            
     def timinggrid(self):
         """
         This function uses the signalcnt, cycles, period, height, and spacing
@@ -334,24 +440,34 @@ class timing:
             lelem.attrib['stroke-width'] = "0.5"
             gelem.append(lelem)
 
-        return gelem
-                                     
         
+        self.svgelem.append(gelem)
+        self.svgelem.append(self.signalselem)
         
 import sys
 
     
 def main():
-    """Plan:
-    1. Get all necessary signals
-    2. Figure out length
-    3. Generate the main clock signal
     """
-    
-    x = timing(sys.argv[1])
-    x.save(sys.argv[2])
-    
+    called with filename.xml filename.svg will convert xml
+    signal definition to svg. 
+
+    but -d filename to start with will parse the docbook filename
+    and create a series of svg files from the timingobject tags with names
+         name.timing.svg
+
+
+
+    """
+    th = TimingHandler()
+
+    saxparser = make_parser()
+
+    saxparser.setContentHandler(th)
+    saxparser.parse(sys.stdin)
+
 
 if __name__ == "__main__":
     main()
+    
     

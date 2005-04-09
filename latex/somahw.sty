@@ -1,0 +1,16 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{somahw}
+
+\newcommand{\signal}[1]{$\textbf{#1}$}
+\newcommand{\signaln}[1]{$\overline{\textbf{#1}}$}
+\newcommand{\bus}[2]{$\textbf{#1}_{#2}$}
+\DeclareGraphicsRule{*}{pdf}{*}{}
+
+\newcommand{\signaldef}[2]{#1 & #2 \\[6pt]}%\hline}
+\newenvironment{SignalTable}[1]
+{\begin{table}%
+\caption{#1}%
+\begin{tabular}{|l|p{5in}|}%
+\hline} 
+{\hline\end{tabular}%
+\end{table}}

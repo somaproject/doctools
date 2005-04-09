@@ -14,3 +14,15 @@
 \hline} 
 {\hline\end{tabular}%
 \end{table}}
+
+
+\newenvironment{MemMap}[1]
+{\begin{table}%
+\caption{#1}%
+\begin{tabular}{|p{1.2in}l|p{5in}|}%
+\hline}
+{\hline\end{tabular}%
+\end{table}}
+\newcommand{\MemMapSimple[2]}{#1 & & #2\\}
+\newcommand{\MemMapRange[3]}{#1 - #2 & & #3\\}
+\newcommand{\MemMapWithBits[3]}{#1 & #2  & #3\\}

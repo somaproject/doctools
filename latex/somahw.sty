@@ -6,7 +6,8 @@
 \newcommand{\bus}[2]{$\textbf{#1}_{#2}$}
 \DeclareGraphicsRule{*}{pdf}{*}{}
 
-\newcommand{\signaldef}[2]{#1 & #2 \\[6pt]}%\hline}
+\newcommand{\signaldef}[2]{#1 & #2 \\[6pt]}
+
 \newenvironment{SignalTable}[1]
 {\begin{table}%
 \caption{#1}%
@@ -19,10 +20,14 @@
 \newenvironment{MemMap}[1]
 {\begin{table}%
 \caption{#1}%
-\begin{tabular}{|p{1.2in}l|p{5in}|}%
-\hline}
+\begin{tabular}{|p{0.7in}l|p{5in}|}%
+\hline%
+Addr & Bits & Desc.\\%
+\hline% 
+}
 {\hline\end{tabular}%
 \end{table}}
-\newcommand{\MemMapSimple[2]}{#1 & & #2\\}
-\newcommand{\MemMapRange[3]}{#1 - #2 & & #3\\}
-\newcommand{\MemMapWithBits[3]}{#1 & #2  & #3\\}
+
+\newcommand{\MemMapSimple}[2]{#1 & & #2\\}
+\newcommand{\MemMapRange}[3]{#1 - #2 & & #3\\}
+\newcommand{\MemMapWithBits}[3]{#1 & #2  & #3\\}

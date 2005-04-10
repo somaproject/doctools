@@ -32,24 +32,29 @@ Comment lines begin with a #
 Note that our tex output is a tabular environment. Dance dance convolution!
 
 
+The convention is to create foo.bar.baz.memmap, and process it to foo.bar.baz.memmap.tex
+
+
 """
 
 import StringIO
 import re
-
+import sys
 
 class TexMemMap(object):
 
     def __init__(self):
-        self.header = "\\begin{memmap}"
+        self.header = "\\begin{MemMap}"
         self.body = ""
-        self.footer = "\end{map}"
+        self.title = ""
+        self.footer = "\end{MemMap}"
 
     def generate(self):
         print self.header
         print self.body
         print self.footer
-        
+    def genTitle(self, string):
+        self.header += "{%s}" % string.strip()
         
     def genSimple(self, addr, expl):
         self.body +=  "\MemMapSimple{%s}{%s}\n" % (addr, expl)
@@ -71,36 +76,40 @@ def memmap2tex(memmap, mmOutput):
     # we read a line at a time, try and match the regexp, and go!
     
     sio = StringIO.StringIO(memmap); 
-
+    firstline = True
+    
     for sl in sio.readlines():
+        if firstline:
+            mmOutput.genTitle(sl)
+            firstline = False
+        else:
+            if not re.match("^#", sl):
+                # not a comment, let's go:
+                result = reSingle.match(sl.strip())
+                if result:
+                    # this was a simple:
+                    mmOutput.genSimple(result.group(1).strip(),
+                                    result.group(2).strip())
 
-        if not re.match("^#", sl):
-            # not a comment, let's go:
-            result = reSingle.match(sl)
-            if result:
-                # this was a simple:
-                mmOutput.genSimple(result.group(1).strip(),
-                                result.group(2).strip())
+                result = reRange.match(sl)
+                if result:
+                    mmOutput.genRange(result.group(1).strip(),
+                                   result.group(2).strip(),
+                                   result.group(3).strip())
 
-            result = reRange.match(sl)
-            if result:
-                mmOutput.genRange(result.group(1).strip(),
-                               result.group(2).strip(),
-                               result.group(3).strip())
-            
-            result = reWithBits.match(sl)
-            if result:
-                mmOutput.genWithBits(result.group(1).strip(),
-                                  result.group(2).strip(),
-                                  result.group(3).strip());
+                result = reWithBits.match(sl)
+                if result:
+                    mmOutput.genWithBits(result.group(1).strip(),
+                                      result.group(2).strip(),
+                                      result.group(3).strip());
             
             
 def test():
-    simpletest = """
+    simpletest = """This is an example memory map
     0x0000 : Address 1
     0x0001:Address 2
     0x0741: More addresses, yayayyaayyayaayayayyayayayya
-    0x0000-0x2000 :  a big range!
+    0x0000-0x2000 :  a big range
     0x0314[3:7] : these are nice bits
     """
 
@@ -110,7 +119,14 @@ def test():
     tm.generate()
 
 def main():
-    test()
+
+    fstr = file(sys.argv[1]).read()
+    
+    tm = TexMemMap()
+    
+    memmap2tex(fstr, tm)
+    tm.generate()
+
 
 
 if __name__ == "__main__":

@@ -395,11 +395,16 @@ def parseTiming(filename):
         elif cl == 'S':
             timingobject.add_signal(na, de)
         elif cl == 'B':
-            
-            l = ls.pop(0)
-            seg = l.split(':')
-            bde = seg[2].strip()
-            
+            # check if we have a class:
+            if len(ls) > 0 and ls[0][:2] == "BC" :
+                
+                l = ls.pop(0)
+                seg = l.split(':')
+                bde = seg[2].strip()
+            else:
+                # there isn't a class; deal
+                bde = ""
+                
             timingobject.add_bus(na, de, bde)
     timingobject.timinggrid()
     timingobject.set_size()

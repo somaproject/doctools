@@ -2,6 +2,7 @@
 TIMING2SVG = $(TOOLSPATH)/timing/timing.py
 SVG2PDF = $(TOOLSPATH)/svg2boundedPDF.py
 MEMMAP = $(LATEXPATH)/memmap.py
+SOMALATEX = $(LATEXPATH)/somatex.py
 LATEX = pdflatex
 
 export TEXINPUTS := .:$(LATEXPATH)//:
@@ -14,21 +15,20 @@ TEXFILES := $(wildcard *.tex)
 
 all: $(SUBPROJECTS) support 
 
-
 $(SUBPROJECTS): 
 	$(MAKE) --directory=$@ $(TARGET)
-
 
 wrapper: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
 	cat $(LATEXPATH)/wrapper.header.tex > wrapped.tex
 	cat $(TARGET) >> wrapped.tex
 	cat $(LATEXPATH)/wrapper.footer.tex >> wrapped.tex
-	$(LATEX)  wrapped.tex $(TARGET).pdf
+	$(SOMALATEX)  wrapped.tex > wrapped.output.tex
+	$(LATEX) wrapped.output.tex
+	mv wrapped.output.pdf $(TARGET).pdf
 
 %.timing.pdf : %.timing
 	$(TIMING2SVG) $<
 	$(SVG2PDF) $<.svg	 
-
 
 %.memmap.tex : %.memmap
 	$(MEMMAP) $< > $@
@@ -38,7 +38,6 @@ wrapper: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
 
 %.pdf : %.tex
 	$(LATEX) $< 
-
 
 graphics: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
 

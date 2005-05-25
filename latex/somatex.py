@@ -42,6 +42,7 @@ import StringIO
 import memmap
 import timing
 import svg2boundedPDF
+import events
 
 def parser(moddict, fid):
     """
@@ -80,8 +81,11 @@ def parser(moddict, fid):
                 while not l == "" and not reEndDict[k].match(l):
                     matchText += l
                     l = fid.readline()
-            
                 print v(matchText, id)
+
+                if reEndDict[k].match(l):
+                    l = fid.readline()
+        
         print l, 
 
 def memmapfun(string, id):
@@ -91,6 +95,31 @@ def memmapfun(string, id):
     memmap.memmap2tex(string, tm)
     return tm.generate()
 
+def eventsfun(string, id):
+    e = events.Event(string.strip())
+    
+    fid = file("%s.event.svg" % id, 'w')
+    e.generateSVG()
+    e.getText(fid)
+    fid.close()
+    svg2boundedPDF.svg2boundedPDF("%s.event.svg" % id)
+    #os.remove("%s.event.svg" % id)
+    return r"\begin{center}\includegraphics[scale=1.2]{%s.event.pdf}\end{center}" % id
+
+
+def dspcmdfun(string, id):
+    dc = events.DSPcmd(string.strip())
+    
+    fid = file("%s.dspcmd.svg" % id, 'w')
+    dc.generateSVG()
+    dc.getText(fid)
+    fid.close()
+    svg2boundedPDF.svg2boundedPDF("%s.dspcmd.svg" % id)
+    #os.remove("%s.event.svg" % id)
+    return r"\begin{center}\includegraphics[scale=1.0]{%s.dspcmd.pdf}\end{center}" % id
+
+
+
 def timingfun(string, id):
     fid = file("%s.timing" % id, 'w') 
     fid.write(string)
@@ -99,14 +128,15 @@ def timingfun(string, id):
     
     # here's where we perform the actual bounded pdf conversion
     svg2boundedPDF.svg2boundedPDF("%s.timing.svg" % id)
-    return "\includegraphics[scale=0.8]{%s.timing.pdf}" % id
+    return "\begin{center}\includegraphics[scale=0.8]{%s.timing.pdf}\end{center}" % id
 
     
 def recursive(filename, base):
+    #print "CALLING RECURSIVE WITH ", filename, base
     fid = file(filename)
 
-    graphicsre = re.compile(r"\\includegraphics\[(.*)]{(.+)}")
-    includere = re.compile(r"\\import{(.*)}{(.+)}")
+    graphicsre = re.compile(r".*\\includegraphics\[(.*)]{(.+)}")
+    includere = re.compile(r".*\\import{(.*)}{(.+)}")
     resultstr = "";
     for l in fid.readlines():
         # if there's an includegraphicsxs
@@ -123,9 +153,8 @@ def recursive(filename, base):
             # text !
             subfilename = includere.match(l).group(2)
             subprefix = includere.match(l).group(1)
-            resultstr += recursive(subprefix + subfilename,
-                                   subprefix)
-            
+            resultstr += recursive(base + subprefix + subfilename,
+                                   base + subprefix)
         else:
             resultstr += l
     return resultstr
@@ -134,10 +163,11 @@ def main():
     s = recursive(sys.argv[1], "")
     sio = StringIO.StringIO(s)
 
-
     foo = {}
     foo["memmap"] = memmapfun
     foo["timing"] = timingfun
+    foo["event"] = eventsfun
+    foo["dspcmd"] = dspcmdfun
     
     parser(foo, sio)
 

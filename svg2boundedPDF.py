@@ -35,7 +35,7 @@ def svg2boundedPDF(filename):
         #os.popen("ps2pdf -dDEVICEWIDTHPOINTS=%d -dDEVICEHEIGHTPOINTS=%d /tmp/%s.eps  %s.pdf" % (x2-x1, y2-y1, filename, filenameWithoutSVG))
         os.popen("ps2pdf -dEPSCrop /tmp/%s.eps  %s.pdf" % (filename, filenameWithoutSVG))
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     filename = sys.argv[1]
     svg2boundedPDF(filename)
     

@@ -40,10 +40,11 @@ import re
 
 class TexMemMap(object):
 
-    def __init__(self):
-        self.header = "\\begin{memmap}"
+    def __init__(self, id):
+        self.header = "\\begin{memmap}{%s}" % id
         self.body = ""
-        self.footer = "\end{map}"
+        self.id = id
+        self.footer = "\end{memmap}"
 
     def generate(self):
         return self.header + '\n' \
@@ -62,7 +63,6 @@ class TexMemMap(object):
 
 def memmap2tex(memmap, mmOutput):
     # takes in a full memmap string
-
     # our pre-build regexps:
     reSingle = re.compile("^([\w\s]+):(.+)")
     reRange = re.compile("^(.+)-(.+):(.+)")

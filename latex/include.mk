@@ -37,7 +37,8 @@ wrapper: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
 	$(SVG2PDF) $< 
 
 %.pdf : %.tex
-	$(LATEX) $< 
+	$(SOMALATEX) $< > $<.out
+	$(LATEX) $<.out 
 
 graphics: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
 

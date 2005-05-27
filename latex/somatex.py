@@ -89,8 +89,7 @@ def parser(moddict, fid):
         print l, 
 
 def memmapfun(string, id):
-    
-    tm = memmap.TexMemMap()
+    tm = memmap.TexMemMap(id)
     
     memmap.memmap2tex(string, tm)
     return tm.generate()

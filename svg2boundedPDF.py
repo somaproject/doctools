@@ -4,6 +4,15 @@ import os
 import sys
 import re
 
+"""
+Depends on:
+   modern version of Inkscape
+   ps2eps
+   ps2pdf
+
+"""
+
+
 def svg2boundedPDF(filename):
 
     (fidin, fidout)= os.popen4("inkscape --without-gui --file=%s  --print='| ps2eps - > /tmp/%s.eps'" % (filename, filename));
@@ -36,6 +45,7 @@ def svg2boundedPDF(filename):
         os.popen("ps2pdf -dEPSCrop /tmp/%s.eps  %s.pdf" % (filename, filenameWithoutSVG))
 
 if __name__ == "__main__":
+    print "test"
     filename = sys.argv[1]
     svg2boundedPDF(filename)
     

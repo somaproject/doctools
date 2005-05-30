@@ -1,0 +1,28 @@
+What do we do?
+
+GOALS ======================================================================
+
+We want to have small modular latex files 
+which we include from other latex files
+and we want these files to be able to live in subdirectories
+
+We also want a method to individually "build" these latex fragments with some sort of "wrapper", i.e. make wrapper target=foo.tex, that will give us foo.pdf to read. 
+
+Now, we're also not writing pure latex, but instead some sort of hacked-latex that includes snippets of latex-like fragments in an attempt to extend/add some semantic markup to our document. Some of these generate svg output. 
+
+The only thing I can natively include into PDFlatex are pdf files. I have a nmumber of technical diagrams that live as svg files. 
+
+svg2boundedPDF should delete its temporary files and also accept files from the input. 
+
+
+Design steps:
+
+1. include all files, with the necessary path modifications
+   -- what about subdependencies
+   -- the python script generates the temporary pdf files from the	
+      included text, but places them in the subdirs
+   -- generates an output foo.somatex file
+
+2. We want to avoid having to explicitly turn the real .svg files into .pdfs. 
+make FOO.pdf: depends on foo.tex
+

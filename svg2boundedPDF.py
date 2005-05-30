@@ -13,7 +13,7 @@ Depends on:
 """
 
 def svgStringToBoundedPDF(string, outfilename):
-    fid = file("/tmp/%s.tmp.svg" % outfilename)
+    fid = file("/tmp/%s.tmp.svg" % outfilename, 'w')
 
     fid.write(string)
     fid.close()

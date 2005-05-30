@@ -19,6 +19,7 @@ How to represent an event / a sequence of bits?
 import xml.dom.minidom
 import xml.dom.ext
 import re
+from StringIO import * 
 
 xmlns="http://www.w3.org/2000/svg"
 
@@ -100,10 +101,16 @@ class xmlFrame:
         self.xos = xos
         self.yos = yos
 
-    def getText(self, fid):
-        self.doc.appendChild(self.svgElement)
-        xml.dom.ext.PrettyPrint(self.doc, fid)
+    def getText(self, fid = None):
         
+        self.doc.appendChild(self.svgElement)
+        if fid:
+            xml.dom.ext.PrettyPrint(self.doc, fid)
+        else:
+            sfid = StringIO()
+            xml.dom.ext.PrettyPrint(self.doc, sfid)
+            return sfid.getvalue()
+   
     def drawWordBase(self, x, y, lcap, rcap,  name, bits):
         """
         bits = how many bits?
@@ -344,8 +351,13 @@ class Event:
         for b, n in zip(self.fields[4], self.fieldnames[4]):
             self.xmlf.drawBitRange(BITSIZE*16, heightspace*2, b[0], b[1], n, 16)
          
-    def getText(self, fid):
-        self.xmlf.getText(fid)
+    def getText(self, fid = None):
+        if fid:
+            self.xmlf.getText(fid)
+        else:
+            sfid = StringIO()
+            self.xmlf.getText(sfid)
+            return sfid.getvalue()
 
         
 class DSPcmd:
@@ -451,8 +463,15 @@ class DSPcmd:
         for b, n in zip(self.fields[1], self.fieldnames[1]):
             self.xmlf.drawBitRange(0, heightspace*2, b[0], b[1], n, 32)
 
-    def getText(self, fid):
-        self.xmlf.getText(fid)
+    def getText(self, fid = None):
+
+        if fid :
+            
+            self.xmlf.getText(fid)
+        else:
+            sfid = StringIO()
+            xml.xmlf.getText(sfid)
+            return sfid.getvalue()
 
         
 def stest():

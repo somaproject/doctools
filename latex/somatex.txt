@@ -12,10 +12,21 @@ Now, we're also not writing pure latex, but instead some sort of hacked-latex th
 
 The only thing I can natively include into PDFlatex are pdf files. I have a nmumber of technical diagrams that live as svg files. 
 
-svg2boundedPDF should delete its temporary files and also accept files from the input. 
+svg2boundedPDF should delete its temporary files and also accept pure strings. 
+
+make foo.pdf will wrap foo.tex
+
+make othertargetname might not
 
 
 Design steps:
+
+0. make dep:
+   for all blah.tex files in the current directory:
+       create a target of the form blah: which contains the subdirs of 
+       all of the subdirectories and will build 
+       
+       and builds: support in each of them 
 
 1. include all files, with the necessary path modifications
    -- what about subdependencies

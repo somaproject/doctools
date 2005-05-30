@@ -100,25 +100,20 @@ def memmapfun(string, id):
 def eventsfun(string, id):
     e = events.Event(string.strip())
     
-    fid = file("%s.event.svg" % id, 'w')
     e.generateSVG()
-    e.getText(fid)
-    fid.close()
-    svg2boundedPDF.svg2boundedPDF("%s.event.svg" % id, "%s.event.pdf" % id)
-    os.remove("%s.event.svg" % id)
+    estr = e.getText()
+    svg2boundedPDF.svgStringToBoundedPDF(estr, "%s.event.pdf" % id)
     return r"\begin{center}\includegraphics[scale=1.2]{%s.event.pdf}\end{center}" % id
 
 
 def dspcmdfun(string, id):
     dc = events.DSPcmd(string.strip())
     
-    fid = file("/tmp/%s.dspcmd.svg" % id, 'w')
     dc.generateSVG()
-    dc.getText(fid)
-    fid.close()
-    svg2boundedPDF.svg2boundedPDF("/tmp/%s.dspcmd.svg" % id,
-                                  "%s.event.pdf" % id)
-    os.remove("%s.event.svg" % id)
+    dspcmdstr = dc.getText()
+    
+    svg2boundedPDF.svgStringToBoundedPDF(dspcmdstr, "%s.event.pdf" % id)
+
     return r"\begin{center}\includegraphics[scale=1.0]{%s.dspcmd.pdf}\end{center}" % id
 
 

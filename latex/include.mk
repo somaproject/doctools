@@ -6,8 +6,6 @@ SOMALATEX = $(LATEXPATH)/somatex.py
 LATEX = pdflatex
 
 export TEXINPUTS := .:$(LATEXPATH)//:
-TIMINGFILES := $(patsubst %.timing,%.timing.pdf,$(wildcard *.timing))
-MEMMAPFILES := $(patsubst %.memmap,%.memmap.tex,$(wildcard *.memmap))
 SVGFILES := $(patsubst %.svg,%.pdf,$(wildcard *.svg))
 TEXFILES := $(wildcard *.tex)
 
@@ -20,7 +18,7 @@ all: $(SUBPROJECTS) support
 $(SUBPROJECTS): 
 	$(MAKE) --directory=$@ $(TARGET)
 
-wrapper: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
+wrapper: $(SVGFILES)
 	cat $(LATEXPATH)/wrapper.header.tex > wrapped.tex
 	cat $(TARGET) >> wrapped.tex
 	cat $(LATEXPATH)/wrapper.footer.tex >> wrapped.tex
@@ -28,31 +26,28 @@ wrapper: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
 	$(LATEX) wrapped.output.tex
 	mv wrapped.output.pdf $(TARGET).pdf
 
-%.timing.pdf : %.timing
-	$(TIMING2SVG) $<
-	$(SVG2PDF) $<.svg	 
-
-%.memmap.tex : %.memmap
-	$(MEMMAP) $< > $@
-
 %.pdf : %.svg
 	$(SVG2PDF) $< 
 
 %.somatex : %.tex
-	$(SOMALATEX) $< > $<.somatex
+	$(SOMALATEX) $< > $(subst .tex,.somatex,$<)
 
-%.pdf : %.tex
-	$(SOMALATEX) $< > $<.out
-	$(LATEX) $<.out 
+%.pdf : %.somatex
+	cat $(LATEXPATH)/wrapper.header.tex > wrapped.tex
+	cat $< >> wrapped.tex
+	cat $(LATEXPATH)/wrapper.footer.tex >> wrapped.tex
+	$(LATEX) wrapped.tex
+	mv wrapped.pdf $(subst .somatex,.pdf,$<)
+	rm wrapped.tex
 
-graphics: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
+
+
+graphics: $(SVGFILES)
 
 support: graphics
 
 clean:	$(SUBPROJECTS)
-	rm -Rf *.timing.pdf *.timing.svg
 	rm -Rf $(patsubst %.tex,%.pdf,$(TEXFILES))
-	rm -Rf $(MEMMAPFILES)
 	rm -Rf *.log *.aux *.dvi *.out
 	rm -Rf $(patsubst %.svg,%.pdf,$(SVGFILES)) 
 	rm -f wildcard.tex 
@@ -60,4 +55,4 @@ clean:	$(SUBPROJECTS)
 include .depends
 
 dep:
-	$(LATEXPATH)/makedeps.sh
+	$(LATEXPATH)/makedeps.py

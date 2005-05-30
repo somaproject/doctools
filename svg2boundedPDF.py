@@ -12,8 +12,21 @@ Depends on:
 
 """
 
+def svgStringToBoundedPDF(string, outfilename):
+    fid = file("/tmp/%s.tmp.svg" % outfilename)
 
-def svg2boundedPDF(filename):
+    fid.write(string)
+    fid.close()
+    
+    svg2boundedPDF("/tmp/%s.tmp.svg" % outfilename, outfilename)
+
+
+def svg2boundedPDF(filename, outfilename):
+    """
+    convert filename to pdf file outputfilename. We make no assumptions
+    file extensions. 
+
+    """
 
     (fidin, fidout)= os.popen4("inkscape --without-gui --file=%s  --print='| ps2eps - > /tmp/%s.eps'" % (filename, filename));
 
@@ -28,11 +41,6 @@ def svg2boundedPDF(filename):
 
     m =  bbre.search(res)
 
-    fnre = re.compile("(.+)\.svg$")
-
-    filenameWithoutSVG = fnre.match(filename).group(1)
-
-
     if m:
         (x1, y1, x2, y2) =  m.groups()
         x1 = int(x1)
@@ -40,12 +48,16 @@ def svg2boundedPDF(filename):
         y1 = int(y1)
         y2 = int(y2)
 
-        #print x1, x2, y1, y2
-        #os.popen("ps2pdf -dDEVICEWIDTHPOINTS=%d -dDEVICEHEIGHTPOINTS=%d /tmp/%s.eps  %s.pdf" % (x2-x1, y2-y1, filename, filenameWithoutSVG))
-        os.popen("ps2pdf -dEPSCrop /tmp/%s.eps  %s.pdf" % (filename, filenameWithoutSVG))
+        os.popen("ps2pdf -dEPSCrop /tmp/%s.eps  %s" % (filename, outfilename))
 
 if __name__ == "__main__":
-    print "test"
     filename = sys.argv[1]
-    svg2boundedPDF(filename)
+
+    fnre = re.compile("(.+)\.svg$")
+
+    filenameWithoutSVG = fnre.match(filename).group(1)
+
+
+
+    svg2boundedPDF(filename, filenameWithoutSVG + ".pdf")
     

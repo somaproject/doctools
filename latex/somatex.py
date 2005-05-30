@@ -32,6 +32,9 @@ recursive(filename, base):
    2. replace all \includegraphics{foo} with \includegraphics{basefoo}
    3. then find includes, call recursive
 
+
+Somatex should place no temporary files into the output except those explicitly needed by pdftex.
+
 """
 
 import re
@@ -101,20 +104,21 @@ def eventsfun(string, id):
     e.generateSVG()
     e.getText(fid)
     fid.close()
-    svg2boundedPDF.svg2boundedPDF("%s.event.svg" % id)
-    #os.remove("%s.event.svg" % id)
+    svg2boundedPDF.svg2boundedPDF("%s.event.svg" % id, "%s.event.pdf" % id)
+    os.remove("%s.event.svg" % id)
     return r"\begin{center}\includegraphics[scale=1.2]{%s.event.pdf}\end{center}" % id
 
 
 def dspcmdfun(string, id):
     dc = events.DSPcmd(string.strip())
     
-    fid = file("%s.dspcmd.svg" % id, 'w')
+    fid = file("/tmp/%s.dspcmd.svg" % id, 'w')
     dc.generateSVG()
     dc.getText(fid)
     fid.close()
-    svg2boundedPDF.svg2boundedPDF("%s.dspcmd.svg" % id)
-    #os.remove("%s.event.svg" % id)
+    svg2boundedPDF.svg2boundedPDF("/tmp/%s.dspcmd.svg" % id,
+                                  "%s.event.pdf" % id)
+    os.remove("%s.event.svg" % id)
     return r"\begin{center}\includegraphics[scale=1.0]{%s.dspcmd.pdf}\end{center}" % id
 
 
@@ -126,7 +130,10 @@ def timingfun(string, id):
     timing.parseTiming("%s.timing" % id)
     
     # here's where we perform the actual bounded pdf conversion
-    svg2boundedPDF.svg2boundedPDF("%s.timing.svg" % id)
+    svg2boundedPDF.svg2boundedPDF("/tmp/%s.timing.svg" % id,
+                                  "%s.event.pdf" % id)
+    os.remove("%s.event.svg" % id)
+    
     return "\begin{center}\includegraphics[scale=0.8]{%s.timing.pdf}\end{center}" % id
 
     

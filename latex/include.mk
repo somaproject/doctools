@@ -11,6 +11,8 @@ MEMMAPFILES := $(patsubst %.memmap,%.memmap.tex,$(wildcard *.memmap))
 SVGFILES := $(patsubst %.svg,%.pdf,$(wildcard *.svg))
 TEXFILES := $(wildcard *.tex)
 
+TEXINCLUDEFIND :=  
+
 .DELETE_ON_ERROR:
 
 all: $(SUBPROJECTS) support 
@@ -36,6 +38,9 @@ wrapper: $(TIMINGFILES) $(MEMMAPFILES) $(SVGFILES)
 %.pdf : %.svg
 	$(SVG2PDF) $< 
 
+%.somatex : %.tex
+	$(SOMALATEX) $< > $<.somatex
+
 %.pdf : %.tex
 	$(SOMALATEX) $< > $<.out
 	$(LATEX) $<.out 
@@ -51,3 +56,8 @@ clean:	$(SUBPROJECTS)
 	rm -Rf *.log *.aux *.dvi *.out
 	rm -Rf $(patsubst %.svg,%.pdf,$(SVGFILES)) 
 	rm -f wildcard.tex 
+
+include .depends
+
+dep:
+	$(LATEXPATH)/makedeps.sh

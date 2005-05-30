@@ -45,7 +45,7 @@ def makedeps(rootdir):
                 except:
                     pass
             depfid.write("%s: %s\n" % (texfile, depstr))
-        
+            depfid.write("support: %s\n" % depstr)
             
         
 if __name__ == "__main__":

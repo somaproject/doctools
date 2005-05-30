@@ -470,7 +470,7 @@ class DSPcmd:
             self.xmlf.getText(fid)
         else:
             sfid = StringIO()
-            xml.xmlf.getText(sfid)
+            self.xmlf.getText(sfid)
             return sfid.getvalue()
 
         

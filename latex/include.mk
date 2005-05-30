@@ -18,18 +18,10 @@ all: $(SUBPROJECTS) support
 $(SUBPROJECTS): 
 	$(MAKE) --directory=$@ $(TARGET)
 
-wrapper: $(SVGFILES)
-	cat $(LATEXPATH)/wrapper.header.tex > wrapped.tex
-	cat $(TARGET) >> wrapped.tex
-	cat $(LATEXPATH)/wrapper.footer.tex >> wrapped.tex
-	$(SOMALATEX)  wrapped.tex > wrapped.output.tex
-	$(LATEX) wrapped.output.tex
-	mv wrapped.output.pdf $(TARGET).pdf
-
 %.pdf : %.svg
 	$(SVG2PDF) $< 
 
-%.somatex : %.tex
+%.somatex : %.tex support
 	$(SOMALATEX) $< > $(subst .tex,.somatex,$<)
 
 %.pdf : %.somatex
@@ -40,19 +32,25 @@ wrapper: $(SVGFILES)
 	mv wrapped.pdf $(subst .somatex,.pdf,$<)
 	rm wrapped.tex
 
-
-
 graphics: $(SVGFILES)
 
 support: graphics
 
-clean:	$(SUBPROJECTS)
+clean:	
 	rm -Rf $(patsubst %.tex,%.pdf,$(TEXFILES))
-	rm -Rf *.log *.aux *.dvi *.out
+	rm -Rf *.log *.aux *.dvi *.out *.somatex
 	rm -Rf $(patsubst %.svg,%.pdf,$(SVGFILES)) 
+	rm -Rf *.dspcmd.pdf *.event.pdf
 	rm -f wildcard.tex 
-
-include .depends
+	rm .depends
 
 dep:
 	$(LATEXPATH)/makedeps.py
+
+
+ifneq (,$(wildcard .depends))
+include .depends
+else
+endif 
+
+

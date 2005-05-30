@@ -112,7 +112,7 @@ def dspcmdfun(string, id):
     dc.generateSVG()
     dspcmdstr = dc.getText()
     
-    svg2boundedPDF.svgStringToBoundedPDF(dspcmdstr, "%s.event.pdf" % id)
+    svg2boundedPDF.svgStringToBoundedPDF(dspcmdstr, "%s.dspcmd.pdf" % id)
 
     return r"\begin{center}\includegraphics[scale=1.0]{%s.dspcmd.pdf}\end{center}" % id
 

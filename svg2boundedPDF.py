@@ -4,6 +4,8 @@ import os
 import sys
 import re
 
+import md5
+
 """
 Depends on:
    modern version of Inkscape
@@ -13,12 +15,15 @@ Depends on:
 """
 
 def svgStringToBoundedPDF(string, outfilename):
-    fid = file("/tmp/%s.tmp.svg" % outfilename, 'w')
+    hash = md5.new()
+    hash.update(string)
+    
+    fid = file("/tmp/%s.tmp.svg" % hash.hexdigest(), 'w')
 
     fid.write(string)
     fid.close()
     
-    svg2boundedPDF("/tmp/%s.tmp.svg" % outfilename, outfilename)
+    svg2boundedPDF("/tmp/%s.tmp.svg" % hash.hexdigest(), outfilename)
 
 
 def svg2boundedPDF(filename, outfilename):
@@ -28,14 +33,14 @@ def svg2boundedPDF(filename, outfilename):
 
     """
 
-    (fidin, fidout)= os.popen4("inkscape --without-gui --file=%s  --print='| ps2eps - > /tmp/%s.eps'" % (filename, filename));
+    (fidin, fidout)= os.popen4("inkscape --without-gui --file=%s  --print='| ps2eps - > /tmp/svg2boundedPDF.eps'" % (filename));
 
 
     res =  fidout.read()
 
 
     # new attempt to extract outut boundingbox
-    fid = file("/tmp/%s.eps" % filename)
+    fid = file('/tmp/svg2boundedPDF.eps')
     res = fid.read()
     bbre = re.compile("%%BoundingBox: (\d+) (\d+) (\d+) (\d+)")
 
@@ -48,7 +53,7 @@ def svg2boundedPDF(filename, outfilename):
         y1 = int(y1)
         y2 = int(y2)
 
-        os.popen("ps2pdf -dEPSCrop /tmp/%s.eps  %s" % (filename, outfilename))
+        os.popen("ps2pdf -dEPSCrop /tmp/svg2boundedPDF.eps  %s" % ( outfilename))
 
 if __name__ == "__main__":
     filename = sys.argv[1]

@@ -1,9 +1,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{somahw}
 \usepackage[pdftex]{graphicx}
-\newcommand{\signal}[1]{$\textbf{#1}$}
-\newcommand{\signaln}[1]{$\overline{\textbf{#1}}$}
-\newcommand{\bus}[2]{$\textbf{#1}_{#2}$}
+\newcommand{\signal}[1]{$\textsc{#1}$}
+\newcommand{\signaln}[1]{$\overline{\textsc{#1}}$}
+\newcommand{\bus}[2]{$\textsc{#1}_{#2}$}
 \DeclareGraphicsRule{*}{pdf}{*}{}
 
 \newcommand{\signaldef}[2]{#1 & #2 \\[6pt]}
@@ -18,15 +18,13 @@
 
 
 \newenvironment{memmap}[1]
-{\begin{table}%
-\caption{#1}%
+{\vspace{0.2in}%
 \begin{tabular}{|p{0.7in}l|p{5in}|}%
 \hline%
 Addr & Bits & Desc.\\%
 \hline% 
 }
-{\hline\end{tabular}%
-\end{table}}
+{\hline\end{tabular}}
 
 \newcommand{\MemMapSimple}[2]{#1 & & #2\\}
 \newcommand{\MemMapRange}[3]{#1 - #2 & & #3\\}

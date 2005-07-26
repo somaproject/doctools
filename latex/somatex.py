@@ -103,7 +103,7 @@ def eventsfun(string, id):
     e.generateSVG()
     estr = e.getText()
     svg2boundedPDF.svgStringToBoundedPDF(estr, "%s.event.pdf" % id)
-    return r"\begin{center}\includegraphics[scale=1.2]{%s.event.pdf}\end{center}" % id
+    return r"\begin{center}\includegraphics[scale=1.5]{%s.event.pdf}\end{center}" % id
 
 
 def dspcmdfun(string, id):
@@ -114,7 +114,7 @@ def dspcmdfun(string, id):
     
     svg2boundedPDF.svgStringToBoundedPDF(dspcmdstr, "%s.dspcmd.pdf" % id)
 
-    return r"\begin{center}\includegraphics[scale=1.0]{%s.dspcmd.pdf}\end{center}" % id
+    return r"\begin{center}\includegraphics[scale=1.5]{%s.dspcmd.pdf}\end{center}" % id
 
 
 

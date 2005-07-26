@@ -18,7 +18,7 @@ How to represent an event / a sequence of bits?
 """ 
 import xml.dom.minidom
 import xml.dom.ext
-import re
+import re, sys
 from StringIO import * 
 
 xmlns="http://www.w3.org/2000/svg"
@@ -310,6 +310,9 @@ class Event:
                 elif bitsL:
                     bitsL = int(bitsL)
                     bitsH = int(bitsL)
+                elif bitsH:
+                    bitsL = int(bitsH)
+                    bitsH = int(bitsH)                  
                 else:
                     bitsL = 0
                     bitsH = 15
@@ -329,7 +332,9 @@ class Event:
         
         # Then we generate the word after that:
         self.xmlf.drawWordBase(BITSIZE*16, 0, True, True, 'EDW0', 16)
+
         for b, n in zip(self.fields[0], self.fieldnames[0]):
+            sys.stderr.write("b[0]= %s, b[1] = %s, n= %s\n" % (b[0], b[1], n)) 
             self.xmlf.drawBitRange(BITSIZE*16, 0, b[0], b[1], n, 16)
             
         

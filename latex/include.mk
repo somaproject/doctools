@@ -36,13 +36,14 @@ graphics: $(SVGFILES)
 
 support: graphics
 
+distclean: clean 
+	rm .depends
 clean:	
 	rm -Rf $(patsubst %.tex,%.pdf,$(TEXFILES))
 	rm -Rf *.log *.aux *.dvi *.out *.somatex
 	rm -Rf $(patsubst %.svg,%.pdf,$(SVGFILES)) 
-	rm -Rf *.dspcmd.pdf *.event.pdf
+	rm -Rf *.dspcmd.pdf *.event.pdf *.dspcmd.svg *.event.svg
 	rm -f wildcard.tex 
-	rm .depends
 
 dep:
 	$(LATEXPATH)/makedeps.py

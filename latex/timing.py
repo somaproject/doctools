@@ -260,7 +260,7 @@ class timing:
         if self.filename == "":
             dump(self.svgelem)
         else:
-            print "Creating ", self.filename
+            #print "Creating ", self.filename
             ElementTree.ElementTree(self.svgelem).write(self.filename)
 
     

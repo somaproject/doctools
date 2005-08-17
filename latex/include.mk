@@ -2,7 +2,7 @@
 TIMING2SVG = $(TOOLSPATH)/timing/timing.py
 SVG2PDF = $(TOOLSPATH)/svg2boundedPDF.py
 MEMMAP = $(LATEXPATH)/memmap.py
-SOMALATEX = $(LATEXPATH)/somatex.py
+SOMALATEX = PYTHONPATH=$(PYTHONPATH):$(TOOLSPATH) $(LATEXPATH)/somatex.py
 LATEX = pdflatex
 
 export TEXINPUTS := .:$(LATEXPATH)//:

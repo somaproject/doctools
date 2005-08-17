@@ -41,7 +41,7 @@ import re
 import os
 import sys
 import StringIO
-
+sys.path.append("../")
 import memmap
 import timing
 import svg2boundedPDF
@@ -72,10 +72,12 @@ def parser(moddict, fid):
         l = fid.readline()
         if l == "":
             break; 
-            
+
+        
         for k, v in moddict.iteritems():
-            if reStartDict[k].match(l):
             
+            if reStartDict[k].match(l):
+                
                 mod = moddict[k]
                 matchText = ""
                 id = reStartDict[k].match(l).group(1)
@@ -119,19 +121,23 @@ def dspcmdfun(string, id):
 
 
 def timingfun(string, id):
+    
     fid = file("%s.timing" % id, 'w') 
     fid.write(string)
     fid.close()
     timing.parseTiming("%s.timing" % id)
     
     # here's where we perform the actual bounded pdf conversion
-    svg2boundedPDF.svg2boundedPDF("/tmp/%s.timing.svg" % id,
-                                  "%s.event.pdf" % id)
-    os.remove("%s.event.svg" % id)
+    svg2boundedPDF.svg2boundedPDF("%s.timing.svg" % id,
+                                  "%s.timing.pdf" % id)
+    os.remove("%s.timing.svg" % id)
     
-    return "\begin{center}\includegraphics[scale=0.8]{%s.timing.pdf}\end{center}" % id
+    x =  r"""\begin{center}
+    \includegraphics[scale=0.8]{%s.timing.pdf}
+    \end{center}""" % id
 
-    
+    return x
+
 def recursive(filename, base):
     #print "CALLING RECURSIVE WITH ", filename, base
     fid = file(filename)

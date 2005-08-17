@@ -63,6 +63,6 @@ if __name__ == "__main__":
     filenameWithoutSVG = fnre.match(filename).group(1)
 
 
-
+    
     svg2boundedPDF(filename, filenameWithoutSVG + ".pdf")
     

@@ -1,0 +1,40 @@
+How to make our documentation? 
+
+
+What are our goals? We would like to be able to independently make subsections of the documentation, and wrap them in some sort of unified header/footer. 
+
+We'd like to cut down on the number of rules we have to build. 
+
+We'd like to localize our build detritus, but not delete it all. 
+
+
+Part of the problem is that the build intermediates are derived from. So what we really want to do is do the hashing-thing. 
+
+1. what if somatex just chunks the included sections into individual files and then make worries about processing them? Sounds nice, except that each time it chunks them the timestamp will be updated. So it would still need some way of figuring out when things had been modified. 
+
+2. I think make may just be the wrong tool for the job. 
+
+What if instead I use somatex.py and then just (light) wrap it in make files that just make calling it easier, or something like that. 
+
+somatex foo.tex:
+   1. handles includes
+   2. handles nested includes
+   3. handles svg includes
+   4. mostly works out of BUILD dirs .
+
+
+let it be recursively called. For example, if there's an include dependency in a folder, we change to that folder and execute the build on that file in that folder. 
+
+somatex foo.tex:
+  wraps foo.tex, recursively builds it
+
+somatex -standalone foo.tex:
+  recursively build foo.tex, don't wrap
+
+somatex -deponly foo.tex:
+  only build the external dependencies for foo.tex, don't actually latex the file. This also recurses in this manner. 
+
+
+
+
+

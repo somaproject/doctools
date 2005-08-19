@@ -1,61 +1,126 @@
 #!/usr/bin/python
 """
 
-This is our latex preprocessor. I've given up the ghost and decided to process documentation this way because it is much more flexible and less likely to make me very sad.
+This is our latex preprocessor.
 
----------------------------------------------------------------------
-INCLUSION and HIERARCHY
----------------------------------------------------------------------
+options:
 
-That said, there are challenges with the recursive nature of the inclusion. So we're defining our own preprocessor directive,
+somatex foo.tex:
+  wraps foo.tex, recursively builds it
 
-\include{blah/}{foo.tex}
+somatex -standalone foo.tex:
+  recursively build foo.tex, don't wrap
 
-and we append blah/ onto the front 
+somatex -deponly foo.tex:
+  only build the external dependencies for foo.tex, don't actually latex the file. This also recurses in this manner.
 
+somatex -norecurse foo.tex:
+  don't recurse
 
-
-
-Most of our types are of the form
-\begin{foo}
-
-
-\end{foo}
-
-which will call a corresponding module foo
-
-We keep a hash of foo->foo() mappings, and build up regexps for each foo.
-
-
-recursive(filename, base):
-   1. read entire file
-   2. replace all \includegraphics{foo} with \includegraphics{basefoo}
-   3. then find includes, call recursive
-
-
-Somatex should place no temporary files into the output except those explicitly needed by pdftex.
 
 """
 
 import re
 import os
 import sys
+import md5
 import StringIO
 sys.path.append("../")
 import memmap
 import timing
-import svg2boundedPDF
+from svg2boundedPDF import *
 import events
+import wrappers
 
-def parser(moddict, fid):
+def hasChanged(oldFile, newFile):
+    """ is newfile newer than oldfile, or are their timestamps
+    the same? """
+
+    if os.path.isfile(oldFile) and os.path.isfile(newFile):
+        
+        return os.stat(newFile).st_mtime < os.stat(oldFile).st_mtime
+    else:
+        return True
+    
+def genLocalDeps(textstr, buildDir, baseDir):
+
+    s1 = genGraphicsDeps(textstr, buildDir, baseDir)
+    s2 = genCustomTex(s1, buildDir, baseDir)
+
+    return s2
+
+
+def genGraphicsDeps(textstr, buildDir, baseDir):
+    """ find everything that's
+    in an \includegraphics[blah][foo.ext}
+
+    identify the extension
+
+    perform the conversion
+
+    place the result in builddir
+
+    modify the string
+
+    replace the appropriate text file.
+
+    if there's not a match, we change the build dir
+
+    
+    
+    """
+
+    # replace the PDFs with the relevant files:
+
+    igre = re.compile(r"(\\includegraphics\[.*\]){(.+)\.(\w+)}", )
+
+    resultstr = ""
+    for s in textstr.split('\n'):
+        m = igre.search(s)
+
+        if m:
+            include = m.group(1)
+            filebase = m.group(2)
+            fileext = m.group(3)
+
+
+            if fileext == "svg" :
+                #perform svg conversion
+                if hasChanged("%s/%s.%s" % (baseDir, filebase, fileext),
+                              "%s/%s/%s.%s.pdf" % (baseDir, buildDir,
+                                                filebase, fileext)):
+                    
+                    svg2boundedPDF("%s/%s.%s" % (baseDir, filebase, fileext),
+                                   "%s/%s/%s.%s.pdf" % (baseDir, buildDir,
+                                                     filebase,fileext))
+
+                resultstr += "%s{%s.%s.pdf}\n" % (include, filebase, fileext)
+            else:
+                # native type?
+                resultstr += "%s{%s/%s.%s}\n" % (include, buildDir,
+                                               filebase, fileext)
+                
+        else:
+            resultstr += "%s\n" % s
+
+    return resultstr
+
+        
+def genCustomTex(texstring, buildDir, baseDir):
     """
     moddict is the dictionary of section-> function mappings
 
-    This code will perform the translation
-
-    
-    
+    This code will perform the translation, and returns the file
+        
     """
+
+    fid = StringIO.StringIO(texstring)
+
+    moddict = {}
+    moddict["memmap"] = memmapfun
+    moddict["timing"] = timingfun
+    moddict["event"] = eventsfun
+    moddict["dspcmd"] = dspcmdfun
 
     # build up regular expression table
     reStartDict = {}
@@ -66,6 +131,7 @@ def parser(moddict, fid):
         reEndDict[k] = re.compile(r"\s*\\end{%s}\s*" % k);
         
     mod = None
+    resultstr = "" 
     l = " "
     while not l == "":
        
@@ -86,58 +152,111 @@ def parser(moddict, fid):
                 while not l == "" and not reEndDict[k].match(l):
                     matchText += l
                     l = fid.readline()
-                print v(matchText, id)
 
+                
+                resultstr += v(matchText.strip(), id, buildDir, baseDir)
+                
                 if reEndDict[k].match(l):
                     l = fid.readline()
         
-        print l, 
+        resultstr += l
 
-def memmapfun(string, id):
+    return resultstr
+
+
+def memmapfun(string, id, buildDir, baseDir):
     tm = memmap.TexMemMap(id)
     
     memmap.memmap2tex(string, tm)
     return tm.generate()
 
-def eventsfun(string, id):
+def eventsfun(string, id, buildDir, baseDir):
+
+    
+    m = md5.new()
+    m.update(string)
+
+    fname = "%s/%s/%s.%s.event.pdf" % (baseDir, buildDir,
+                                        id, m.hexdigest())
+    
+    if not os.path.isfile(fname):        
+        print "generating event ", fname
+    
     e = events.Event(string.strip())
     
     e.generateSVG()
     estr = e.getText()
-    svg2boundedPDF.svgStringToBoundedPDF(estr, "%s.event.pdf" % id)
-    return r"\begin{center}\includegraphics[scale=1.5]{%s.event.pdf}\end{center}" % id
+    svgStringToBoundedPDF(estr, fname)
+
+    iname = "%s.%s.event.pdf" % (id, m.hexdigest())
+
+    return r"\begin{center}\includegraphics[scale=1.5]{%s}\end{center}" % iname
 
 
-def dspcmdfun(string, id):
+def dspcmdfun(string, id, buildDir, baseDir):
+
+    m = md5.new()
+    m.update(string)
+
+    fname = "%s/%s/%s.%s.dspcmd.pdf" % (baseDir, buildDir,
+                                        id, m.hexdigest())
+    
+    if not os.path.isfile(fname):        
+        print "generating dspcmd ", fname
+    
     dc = events.DSPcmd(string.strip())
     
     dc.generateSVG()
     dspcmdstr = dc.getText()
     
-    svg2boundedPDF.svgStringToBoundedPDF(dspcmdstr, "%s.dspcmd.pdf" % id)
+    svgStringToBoundedPDF(dspcmdstr, fname)
 
-    return r"\begin{center}\includegraphics[scale=1.5]{%s.dspcmd.pdf}\end{center}" % id
+    iname = "%s.%s.dspcmd.pdf" % (id, m.hexdigest())
+
+    return r"\begin{center}\includegraphics[scale=1.5]{%s}\end{center}" % iname
 
 
 
-def timingfun(string, id):
+def timingfun(string, id, buildDir, baseDir):
     
-    fid = file("%s.timing" % id, 'w') 
-    fid.write(string)
-    fid.close()
-    timing.parseTiming("%s.timing" % id)
+    m = md5.new()
+    m.update(string)
+
+    fname = "%s/%s/%s.%s.timing.pdf" % (baseDir, buildDir,
+                                        id, m.hexdigest())
     
-    # here's where we perform the actual bounded pdf conversion
-    svg2boundedPDF.svg2boundedPDF("%s.timing.svg" % id,
-                                  "%s.timing.pdf" % id)
-    os.remove("%s.timing.svg" % id)
+    if not os.path.isfile(fname):        
+        print "generating timing ", fname
+        
+        timing.parseTiming(string, "%s/%s/%s.timing.svg" % (baseDir,
+                                                            buildDir, id))
+    
+        # here's where we perform the actual bounded pdf conversion
+        svg2boundedPDF("%s/%s/%s.timing.svg" % (baseDir, buildDir, id),
+                       "%s/%s/%s.%s.timing.pdf" % (baseDir, buildDir,
+                                                   id, m.hexdigest()))
+
     
     x =  r"""\begin{center}
-    \includegraphics[scale=0.8]{%s.timing.pdf}
-    \end{center}""" % id
+    \includegraphics[scale=0.8]{%s.%s.timing.pdf}
+    \end{center}""" % (id, m.hexdigest())
 
     return x
 
+def buildRecursive(filestr, buildDir, baseDir):
+    """ simply build all sub-dependents"""
+    
+
+    includere = re.compile(r".*\\import{(.*)}{(.+)}")
+    for l in filestr.split("\n"):
+        if includere.match(l):
+            # text !
+            subfilename = includere.match(l).group(2)
+            subprefix = includere.match(l).group(1)
+            
+            somatex(subfilename, buildDir, "%s/%s" % (baseDir, subprefix))
+            
+    
 def recursive(filename, base):
     #print "CALLING RECURSIVE WITH ", filename, base
     fid = file(filename)
@@ -153,7 +272,7 @@ def recursive(filename, base):
             args = res.group(1)
             filename = res.group(2)
 
-            resultstr += "\n\\includegraphics[" + args + "]{" \
+            resultstr += r"\n\includegraphics[" + args + "]{" \
                          + base + filename + "}"
             
         elif includere.match(l):
@@ -166,19 +285,118 @@ def recursive(filename, base):
             resultstr += l
     return resultstr
 
-def main():
-    s = recursive(sys.argv[1], "")
-    sio = StringIO.StringIO(s)
+from optparse import OptionParser
 
-    foo = {}
-    foo["memmap"] = memmapfun
-    foo["timing"] = timingfun
-    foo["event"] = eventsfun
-    foo["dspcmd"] = dspcmdfun
+
+def somatex(filename, buildDir, baseDir):
+    """
+    filename = the latex file we're going to try and build
+
+    baseDir : this might more correctly be called the target working
+    directory. Even though somatex might have a different cwd, this should
+    point to the desired wd.
+
     
-    parser(foo, sio)
+    buildDir = normally BUILD, the place where we dump all of our
+    outputs relative to baseDir
+    
+    """
+
+    filestr = file("%s/%s" % (baseDir, filename)).read()
+
+    if not os.path.isdir("%s/%s" % (baseDir, buildDir)):
+        os.mkdir("%s/%s" % (baseDir, buildDir))
+        
+
+    fre = re.compile(".+/(.+).tex")
+    m = fre.match("%s/%s" % (baseDir, filename))
+
+    fbase = m.group(1)
+    fid = file("%s/%s/%s.somatex" % (baseDir, buildDir, fbase), 'w')
 
 
+    buildRecursive(filestr, buildDir, baseDir)
+    
+    resultstr = genLocalDeps(filestr, buildDir, baseDir)
+
+    resultstr = includeSubfiles(resultstr, buildDir, baseDir)
+
+    fid.write(resultstr)
+
+    fid.close()
+    
+
+def includeSubfiles(filestr, buildDir, baseDir):
+    """ include all subfiles """
+
+
+    resultstr = ""
+    
+    includere = re.compile(r".*\\import{(.*)}{(.+)\.tex}")
+    subre = re.compile(r"(\\includegraphics\[.+\]{)(.+})")
+    for l in filestr.split("\n"):
+        if includere.match(l):
+            # text !
+            
+            subfilenamebase = includere.match(l).group(2)
+            subprefix = includere.match(l).group(1)
+
+            #print subfilename, buildDir, subprefix
+
+            fid = file("%s/%s/%s/%s.somatex" % (baseDir, subprefix,
+                                                buildDir, subfilenamebase))
+            instr = fid.read()
+            s = subre.sub("\g<1>../%s/%s/\g<2>" % (subprefix, buildDir), instr) 
+
+            hdr = """%% --------------------------------------------------------\n%% %s\n%% --------------------------------------------------------\n """  % fid.name
+
+            resultstr += (hdr + s)
+            
+        else:
+            resultstr += "%s\n" % l
+
+    return resultstr
+
+
+def wrapSomaTex(filename, buildDir, baseDir):
+    """ simply wrap the file """
+
+    fnamere = re.compile("(.+)\.tex")
+    m = fnamere.match(filename)
+    
+    sfile = file("%s/%s.somatex" % (buildDir, m.group(1)))
+
+    fout = file("%s/%s.wrapped.somatex" % (buildDir, m.group(1)), 'w')
+
+    fout.write(wrappers.header)
+    fout.write(sfile.read())
+    fout.write(wrappers.footer)
+    fout.close()
+    
+                 
+    
+    
+def main():
+
+    parser = OptionParser()
+    parser.add_option("-s", "--standalone",  action="store_true",
+                      dest="standalone",
+                      default = False)
+    parser.add_option("-b", "--builddir", action="store", type="string",
+                      dest="builddir", default = "BUILD")
+    parser.add_option("-a", "--basedir", action="store", type="string",
+                      dest="basedir", default = ".")
+                     
+    options, args = parser.parse_args()
+    
+    filename = sys.argv[1]
+
+    somatex(filename, options.builddir, options.basedir)
+
+    if not options.standalone:
+        wrapSomaTex(filename, options.builddir, options.basedir)
+        #latexSomaTex(filename, options.builddir, options.basedir)
+        
 if __name__ == "__main__":
     main()
 

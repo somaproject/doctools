@@ -369,15 +369,14 @@ class timing:
         
 import sys
 
-def parseTiming(filename):
-    fid = file(filename)
-
-    ls = fid.readlines()
-
-
+def parseTiming(timingString, outFilename):
+    """ takes in a timing string and writes the resulting
+    svg to outFilename """
 
     
-    timingobject = timing(filename + ".svg")
+    ls = timingString.split('\n')
+    
+    timingobject = timing(outFilename)
     
 
     while len(ls) > 0:

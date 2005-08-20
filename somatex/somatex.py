@@ -182,11 +182,11 @@ def eventsfun(string, id, buildDir, baseDir):
     if not os.path.isfile(fname):        
         print "generating event ", fname
     
-    e = events.Event(string.strip())
+        e = events.Event(string.strip())
     
-    e.generateSVG()
-    estr = e.getText()
-    svgStringToBoundedPDF(estr, fname)
+        e.generateSVG()
+        estr = e.getText()
+        svgStringToBoundedPDF(estr, fname)
 
     iname = "%s.%s.event.pdf" % (id, m.hexdigest())
 
@@ -204,12 +204,12 @@ def dspcmdfun(string, id, buildDir, baseDir):
     if not os.path.isfile(fname):        
         print "generating dspcmd ", fname
     
-    dc = events.DSPcmd(string.strip())
+        dc = events.DSPcmd(string.strip())
     
-    dc.generateSVG()
-    dspcmdstr = dc.getText()
+        dc.generateSVG()
+        dspcmdstr = dc.getText()
     
-    svgStringToBoundedPDF(dspcmdstr, fname)
+        svgStringToBoundedPDF(dspcmdstr, fname)
 
     iname = "%s.%s.dspcmd.pdf" % (id, m.hexdigest())
 
@@ -372,8 +372,32 @@ def wrapSomaTex(filename, buildDir, baseDir):
     fout.write(sfile.read())
     fout.write(wrappers.footer)
     fout.close()
-    
+    sfile.close()
                  
+def makePDF(filename, buildDir, baseDir, wrapped):
+    pathname = os.path.dirname(sys.argv[0])  
+
+    LATEXCMD = "pdflatex"
+    os.chdir(buildDir)
+
+    os.environ["TEXINPUTS"] = ":../%s/" % (pathname)
+
+
+    fre = re.compile("(.+).tex")
+    filenamebase = fre.match(filename).group(1)
+    if wrapped:
+        cmd = "%s %s.wrapped.somatex" % (LATEXCMD, filenamebase)
+    else:
+        cmd = "%s %s.somatex" % (LATEXCMD, filenamebase)
+
+    
+    os.system(cmd)
+             
+        
+    #os.chdir("../")
+    
+    
+    
     
     
 def main():
@@ -389,14 +413,16 @@ def main():
                      
     options, args = parser.parse_args()
     
-    filename = sys.argv[1]
+    filename = sys.argv[2]
 
     somatex(filename, options.builddir, options.basedir)
 
     if not options.standalone:
         wrapSomaTex(filename, options.builddir, options.basedir)
         #latexSomaTex(filename, options.builddir, options.basedir)
-        
+
+    makePDF(filename, options.builddir, options.basedir, not options.standalone)
+    
 if __name__ == "__main__":
     main()
 

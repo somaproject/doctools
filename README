@@ -25,16 +25,4 @@ somatex foo.tex:
 
 let it be recursively called. For example, if there's an include dependency in a folder, we change to that folder and execute the build on that file in that folder. 
 
-somatex foo.tex:
-  wraps foo.tex, recursively builds it
-
-somatex -standalone foo.tex:
-  recursively build foo.tex, don't wrap
-
-somatex -deponly foo.tex:
-  only build the external dependencies for foo.tex, don't actually latex the file. This also recurses in this manner. 
-
-
-
-
 

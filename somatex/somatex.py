@@ -380,8 +380,8 @@ def makePDF(filename, buildDir, baseDir, wrapped):
     LATEXCMD = "pdflatex"
     os.chdir(buildDir)
 
-    os.environ["TEXINPUTS"] = ":../%s/" % (pathname)
-
+    os.environ["TEXINPUTS"] = ":%s/" % (pathname)
+    print os.environ["TEXINPUTS"]
 
     fre = re.compile("(.+).tex")
     filenamebase = fre.match(filename).group(1)
@@ -413,8 +413,9 @@ def main():
                      
     options, args = parser.parse_args()
     
-    filename = sys.argv[2]
-
+    filename = args[0]
+    
+    
     somatex(filename, options.builddir, options.basedir)
 
     if not options.standalone:

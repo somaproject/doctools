@@ -375,7 +375,7 @@ def wrapSomaTex(filename, buildDir, baseDir):
     sfile.close()
                  
 def makePDF(filename, buildDir, baseDir, wrapped):
-    pathname = os.path.dirname(sys.argv[0])  
+    pathname = os.path.dirname(os.path.abspath(sys.argv[0])  )
 
     LATEXCMD = "pdflatex"
     os.chdir(buildDir)
@@ -389,6 +389,9 @@ def makePDF(filename, buildDir, baseDir, wrapped):
         cmd = "%s %s.wrapped.somatex" % (LATEXCMD, filenamebase)
     else:
         cmd = "%s %s.somatex" % (LATEXCMD, filenamebase)
+    print "executing:"
+    print cmd
+    
 
     
     os.system(cmd)

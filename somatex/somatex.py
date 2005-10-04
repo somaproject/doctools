@@ -94,7 +94,9 @@ def genGraphicsDeps(textstr, buildDir, baseDir):
                                    "%s/%s/%s.%s.pdf" % (baseDir, buildDir,
                                                      filebase,fileext))
 
-                resultstr += "%s{%s.%s.pdf}\n" % (include, filebase, fileext)
+                resultstr += igre.sub("%s{%s.%s.pdf}" % (include,
+                                                         filebase, fileext),
+                                      s) + '\n'
             else:
                 # native type?
                 resultstr += "%s{%s/%s.%s}\n" % (include, buildDir,

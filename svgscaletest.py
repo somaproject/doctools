@@ -1,4 +1,4 @@
-
+#!/usr/bin/python
 """
 A simple demo that reads in an XML document and spits out an equivalent,
 but not necessarily identical, document.
@@ -9,7 +9,7 @@ import sys, string
 from xml.sax import saxutils, handler, make_parser
 import re
 from scipy import *
-
+import os.path
 
 def styleStringToDict(sstr):
     sdict = {}
@@ -216,9 +216,11 @@ def transformPath(pathstr, tm):
 
 class ContentGenerator(handler.ContentHandler):
 
-    def __init__(self, out = sys.stdout):
+    def __init__(self, filename):
         handler.ContentHandler.__init__(self)
-        self._out = out
+        (fdir, fname) = os.path.split(filename)
+        self._out = file('/tmp/%s.errors.svg' % fname, 'w')
+        self.filename = fname
 
         self.tmstack = []
 
@@ -235,7 +237,7 @@ class ContentGenerator(handler.ContentHandler):
     def checkCurrentTM(self):
         tm = self.getCurrentTM()
         if abs(tm[0, 0]) != abs(tm[1, 1]):
-            print "non-uniformly scaled transformation matrix"
+            print self.filename, "non-uniformly scaled transformation matrix"
             return True
         return False
             
@@ -260,7 +262,6 @@ class ContentGenerator(handler.ContentHandler):
 
 
         if self.checkCurrentTM():
-            print name
             self._out.write('<' + name)
             for (name, value) in attrs.items():
                 self._out.write(' %s="%s"' % (name,
@@ -292,7 +293,7 @@ class ContentGenerator(handler.ContentHandler):
 # --- The main program
 
 parser = make_parser()
-fout = file("/tmp/test.svg", 'w')
-
-parser.setContentHandler(ContentGenerator(fout))
-parser.parse(sys.argv[1])
+for f in sys.argv[1:]:
+    parser.setContentHandler(ContentGenerator(f))
+    parser.parse(f)
+    

@@ -36,9 +36,17 @@ def svg2boundedPDF(filename, outfilename):
     if os.path.isfile("/tmp/svg2boundedPDF.eps"):
         os.unlink("/tmp/svg2boundedPDF.eps")
         
-    
-    (fidin, fidout)= os.popen4("inkscape --without-gui --file=%s  --print='| ps2eps - > /tmp/svg2boundedPDF.eps'" % (filename));
 
+
+    try:
+        fid = file(filename)
+    except IOError:
+        raise IOError, "%s not openable" % filename
+    fid.close()
+        
+    cmdstr = "inkscape --without-gui --file=%s  --print='| ps2eps - > /tmp/svg2boundedPDF.eps'" % (filename)
+    
+    (fidin, fidout)= os.popen4(cmdstr)
 
     res =  fidout.read()
 

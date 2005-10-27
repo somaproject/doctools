@@ -86,6 +86,7 @@ def genGraphicsDeps(textstr, buildDir, baseDir):
 
             if fileext == "svg" :
                 #perform svg conversion
+               
                 if hasChanged("%s/%s.%s" % (baseDir, filebase, fileext),
                               "%s/%s/%s.%s.pdf" % (baseDir, buildDir,
                                                 filebase, fileext)):

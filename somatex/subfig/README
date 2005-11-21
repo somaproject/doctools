@@ -1,0 +1,99 @@
+Manifest and Documentation for the `subfig' package (version 1.3).
+------------------------------------------------------------------------
+
+This directory contains version 1.3 of the subfig package.  In a UNIX
+or UNIX-like command shell, use `make' to extract the subfig package
+and run the local tests.
+
+
+MANIFEST:
+---------
+  The following files as well as the derivative files `subfig.sty' and
+  `altsf.cfg' constitute the subfig package and are considered as "the
+  work" under the LaTeX Project Public License (LPPL 1.3 or later).
+
+Makefile           UNIX makefile to extract the subfig package
+                       and related material.
+README             This file.
+subfig.dtx         The documented subfig package.
+subfig.ins         The subfig package installation file.
+subfig.pdf         The subfig package documentation (in PDF).
+test1.tex          Test one: Basic checks and examples.
+test2.tex          Test two: Check for extra space around figure
+test3.tex          Test four: Test of optional args and \subref.
+test4.tex          Test four: Test of interaction with hyperref.
+test5.tex          Test five: Test of continued figures.
+test6.tex          Test six: Test of options and option interaction.
+test7.tex          Test seven: Test of class/package misuse of \let.
+
+
+FILES AFTER `make':
+-------------------
+Makefile           UNIX makefile to extract the subfig package
+                       and related material.
+README             This file.
+altsf.cfg          A subfig configuration file (which make the subfig 
+                        package act similar to the subfigure package).
+ltxdoc.cfg         Configuration file to print change history and
+                       index on the subfig package documentation.       
+subfig.dtx         The documented subfig package.
+subfig.ins         The subfig package installation file.
+subfig.pdf         The subfig package documentation (in PDF).
+subfig.ps          The subfig package documentation (in PostScript).
+subfig.sty         The subfig package 
+test1.ps           Results of test one.
+test1.tex          Test one: Basic checks and examples.
+test2.ps           Results of test two.
+test2.tex          Test two: Check for extra space around figure
+test3.ps           Results of test three.
+test3.tex          Test four: Test of optional args and \subref.
+test4.pdf          Results of test four.
+test4.tex          Test four: Test of interaction with hyperref.
+test5.ps           Results of test five.
+test5.tex          Test five: Test of continued figures.
+test6.ps           Results of test six.
+test6.tex          Test six: Test of options and option interaction.
+test7.tex          Test seven: Test of class/package misuse of \let.
+test7a.ps          Log from test seven run.
+test7b.ps          Results of test seven.
+
+
+NOTES:
+------
+
+1. To verify the results of the test(s) (which are run using the
+   preferred options), compare with the test(s) found at:
+   http://www.cs.cmu.edu/~sdc/latex/subfig.13/
+
+2. This version of the subfig package removes a "feature" which
+   allowed a line break to occur between two subfloats separated
+   by whitespace instead of requiring an explicit "\\".  If this
+   "feature" was used to position sub-floats, they may now be
+   incorrectly displayed.
+
+   If this occurs, the solution is to add an expicit linebreak
+   between the problem sub-floats.  For example, the following
+   to the left would seem to work correctly, but suppressed
+   the "farskip" placing the figures too close together and 
+   will, now, no longer work.  It should be written as on the
+   left.
+
+   \begin{figure}                  \begin{figure}		
+     \centering	                     \centering		
+       \subfloat[One.]{...}%	       \subfloat[One.]{...}	
+     \hspace{.25in}%		     \hspace{.25in}%		
+       \subfloat[Two.]{...}	       \subfloat[Two.]{...} \\	
+       \subfloat[Three.]{...}%         \subfloat[Three.]{...}	
+     \hspace{.25in}%		     \hspace{.25in}%		
+       \subfloat[Four.]{...}%	       \subfloat[Four.]{...}	
+     \caption{Simple Case.}	     \caption{Simple Case.}	
+   \end{figure}                    \end{figure}               
+
+
+
+
+
+
+
+
+

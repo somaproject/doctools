@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import os.path
 import sys
 import re
 
@@ -27,10 +28,33 @@ def svgStringToBoundedPDF(string, outfilename):
 
 
 def svg2boundedPDF(filename, outfilename):
+    #svg2boundedPDFeps(filename, outfilename)
+    svg2boundedPDFbatik(filename, outfilename)
+
+def svg2boundedPDFbatik(filename, outfilename):
+    """
+    Uses batik and java to convert svg file filename to pdf file ouputfilename
+    """
+
+    somatexpy = sys.argv[0]
+    #we just go up two and then append the jarfile
+    s1 = os.path.split(somatexpy)[0]
+    s2 = os.path.split(s1)[0]
+    print s2
+    
+    jarfile = "batik/batik-rasterizer.jar" 
+    os.system("java -jar %s -m application/pdf %s -d %s" % (s2 + '/' + jarfile,
+                                                            filename,
+                                                            outfilename))
+    
+              
+def svg2boundedPDFeps(filename, outfilename):
     """
     convert filename to pdf file outputfilename. We make no assumptions
-    file extensions. 
+    file extensions. Goes through an eps intermediate step. 
 
+    Creates a constraining bounding box.
+    
     """
 
     if os.path.isfile("/tmp/svg2boundedPDF.eps"):

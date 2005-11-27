@@ -384,7 +384,7 @@ def makePDF(filename, buildDir, baseDir, wrapped):
     os.chdir(buildDir)
 
     os.environ["TEXINPUTS"] = ":%s/" % (pathname)
-    print os.environ["TEXINPUTS"]
+    print "TEXINPUTS=",  os.environ["TEXINPUTS"]
 
     fre = re.compile("(.+).tex")
     filenamebase = fre.match(filename).group(1)

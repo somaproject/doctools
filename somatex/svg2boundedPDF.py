@@ -8,10 +8,14 @@ import re
 import md5
 
 """
+Takes an SVG file and generates a PDF with a tight bounding box.
+
+
 Depends on:
    modern version of Inkscape
    ps2eps
    ps2pdf
+
 
 """
 

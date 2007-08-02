@@ -240,7 +240,8 @@ class timing:
         self.classes = {}
         
         
-        self.svgelem = Element("svg")
+        self.svgelem = Element("{http://www.w3.org/2000/svg}svg")
+
 
         self.signalselem = Element("g")
         
